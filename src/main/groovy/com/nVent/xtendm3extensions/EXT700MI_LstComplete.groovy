@@ -4,11 +4,12 @@
 // @version   1,0 
 //
 // Description 
-// This API transacation LstComplete is used for send data to ESKAR from M3
+// This API transacation LstComplete is used to send data to ESKAR from M3
 //
 
 import java.math.RoundingMode 
 import java.math.BigDecimal
+import java.lang.Math
 
 
 public class LstComplete extends ExtendM3Transaction {
@@ -67,6 +68,14 @@ public class LstComplete extends ExtendM3Transaction {
   public double RecCostAmount 
   public double RecExcRate 
   public double Result 
+  public double CalcCOFA1   
+  public double CalcDMCF1   
+  public double CalcCOFA2   
+  public double CalcDMCF2   
+  public double ResultFACT1   
+  public double ResultFACT2   
+  public double ResultFACTTotal   
+  public String PPUN       
     
   // Definition of output fields
   public String OutLPUD
@@ -99,7 +108,7 @@ public class LstComplete extends ExtendM3Transaction {
   public String OutGRIA
   public String OutTIVA
   public String OutIVNA
-  //public String OutPUUN    //A 20210414
+  public String OutFACT    
   
   
   // Constructor 
@@ -206,8 +215,6 @@ public class LstComplete extends ExtendM3Transaction {
        int countFGRECL = query.readAll(FGRECL, 5,{ DBContainer record -> 
        
        RecLine.add(record.createCopy()) 
-       logger.info("countFGRECL ${countFGRECL}")
-       logger.info("record ${record}")
     })
     }
     
@@ -330,7 +337,7 @@ public class LstComplete extends ExtendM3Transaction {
     mi.outData.put("GRIA", OutGRIA)
     mi.outData.put("TIVA", OutTIVA)
     mi.outData.put("IVNA", OutIVNA) 
-    //mi.outData.put("PUUN", OutPUUN)    //A 20210414
+    mi.outData.put("FACT", OutFACT)    
     
   } 
     
@@ -350,9 +357,7 @@ public class LstComplete extends ExtendM3Transaction {
      }else if(RegDate == 0 && !isNullOrEmpty(PO)){
        expression = expression.gt("IBPUST", "69").and(expression.lt("IBPUST", "81")).and(expression.eq("IBPUNO",  String.valueOf(PO)))
      }else{
-       //expression = expression.gt("IBPUST", "69").and(expression.lt("IBPUST", "81"))   //D 20210414
-       //expression = expression.lt("IBPUST", "80")        //A 20210414
-       expression = expression.le("IBPUST", "80")        //A 20210414
+       expression = expression.le("IBPUST", "80")        
      }
      
      // List Purchase order line   
@@ -384,13 +389,13 @@ public class LstComplete extends ExtendM3Transaction {
   OutITNO = String.valueOf(line.get("IBITNO"))  
   OutLNAM = String.valueOf(line.get("IBLNAM"))
   OutPITD = String.valueOf(line.get("IBPITD"))
-  //OutPUUN = String.valueOf(line.get("IBPUUN"))   //A 20210414
-    
+
   // Fields for calculation
   ORQA = line.get("IBORQA")
   IVQA = line.get("IBIVQA")
   RVQA = line.get("IBRVQA") 
   PUUN = line.get("IBPUUN") 
+  PPUN = line.get("IBPPUN")    
     
   // Calculate with alternativ unit 
   Optional<DBContainer> MITAUN = findMITAUN(Company, ItemNumber, 1, PUUN)
@@ -419,6 +424,37 @@ public class LstComplete extends ExtendM3Transaction {
     OutRVQT = String.valueOf(RVQA)
   }
   
+  // Calculate with Unit of measure factor   
+  // Get COFA and DMCF from PPUN             
+  Optional<DBContainer> MITAUN1 = findMITAUN(Company, ItemNumber, 2, PPUN)
+  if(MITAUN1.isPresent()){
+    // Record found, continue to get information  
+    DBContainer containerMITAUN1 = MITAUN1.get() 
+    CalcCOFA1 = containerMITAUN1.get("MUCOFA")
+    CalcDMCF1 = containerMITAUN1.get("MUDMCF") 
+  } else { 
+    CalcCOFA1 = 1
+    CalcDMCF1 = 1
+  }
+  
+  // Get COFA and DMCF from PUUN            
+  Optional<DBContainer> MITAUN2 = findMITAUN(Company, ItemNumber, 2, PUUN)
+  if(MITAUN2.isPresent()){
+    // Record found, continue to get information  
+    DBContainer containerMITAUN2 = MITAUN2.get() 
+    CalcCOFA2 = containerMITAUN2.get("MUCOFA")
+    CalcDMCF2 = containerMITAUN2.get("MUDMCF") 
+  } else { 
+    CalcCOFA2 = 1
+    CalcDMCF2 = 1
+  }
+
+  //Calculate the UoM factor               
+  ResultFACT1 = Math.pow(CalcCOFA2,((CalcDMCF2 * -2) + 3))
+  ResultFACT2 = Math.pow(CalcCOFA1,((CalcDMCF1 * 2) - 3))
+  ResultFACTTotal = ResultFACT1 * ResultFACT2
+  OutFACT = String.valueOf(ResultFACTTotal)
+
     
     // Get Purchase order head
   Optional<DBContainer> MPHEAD = findMPHEAD(Company, PurchaseOrder)
