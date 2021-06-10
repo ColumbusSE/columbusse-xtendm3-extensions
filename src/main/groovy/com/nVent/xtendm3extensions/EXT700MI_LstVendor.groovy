@@ -97,7 +97,7 @@ public class LstVendor extends ExtendM3Transaction {
     CIDADR.set("SASUNO", SUNO)
     CIDADR.set("SAADTE", ADTE)
     CIDADR.set("SAADID", ADID)
-    CIDADR.set("SASTDT", 20080101)
+    //CIDADR.set("SASTDT", 20080101)
     if(query.read(CIDADR))  { 
       return Optional.of(CIDADR)
     } 
@@ -193,7 +193,9 @@ public class LstVendor extends ExtendM3Transaction {
      expression = expression.eq("IDSTAT", String.valueOf(InSTAT))
 
      // List Purchase order line   
-     DBAction actionline = database.table("CIDMAS").index("00").matching(expression).selectAllFields().build()   
+     //DBAction actionline = database.table("CIDMAS").index("00").matching(expression).selectAllFields().build()   //D 20210604
+     DBAction actionline = database.table("CIDMAS").index("00").matching(expression).selection("IDCONO", "IDSUNO", "IDSUNM", "IDSTAT", "IDPHNO", "IDTFNO", "IDCSCD", "IDECAR", "IDVRNO").build()   //A 20210604 
+
      DBContainer line = actionline.getContainer()  
      
      // Read with one key  

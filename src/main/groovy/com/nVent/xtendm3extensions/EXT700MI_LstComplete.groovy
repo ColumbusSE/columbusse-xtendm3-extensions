@@ -153,7 +153,8 @@ public class LstComplete extends ExtendM3Transaction {
   // Get Division information MPHEAD
   //******************************************************************** 
   private Optional<DBContainer> findMPHEAD(Integer CONO, String PUNO){  
-    DBAction query = database.table("MPHEAD").index("00").selectAllFields().build()
+    //DBAction query = database.table("MPHEAD").index("00").selectAllFields().build()              //D 20210607
+    DBAction query = database.table("MPHEAD").index("00").selection("IACONO", "IAPUNO", "IADIVI", "IASUNO", "IANTAM", "IAPUDT", "IABUYE").build()    //A 20210607
     def MPHEAD = query.getContainer()
     MPHEAD.set("IACONO", CONO)
     MPHEAD.set("IAPUNO", PUNO)
@@ -351,18 +352,19 @@ public class LstComplete extends ExtendM3Transaction {
    
      // Depending on input value (Registrationdate and Purchase order)
      if(RegDate != 0 && !isNullOrEmpty(PO)){
-       expression = expression.gt("IBPUST", "69").and(expression.lt("IBPUST", "81")).and(expression.eq("IBRGDT", String.valueOf(RegDate))).and(expression.eq("IBPUNO",  String.valueOf(PO)))
+       expression = expression.gt("IBPUST", "69").and(expression.lt("IBPUST", "81")).and(expression.eq("IBRGDT", String.valueOf(RegDate))).and(expression.eq("IBPUNO",  String.valueOf(PO)))     
      }else if(RegDate != 0 && isNullOrEmpty(PO)){
        expression = expression.gt("IBPUST", "69").and(expression.lt("IBPUST", "81")).and(expression.eq("IBRGDT", String.valueOf(RegDate))) 
      }else if(RegDate == 0 && !isNullOrEmpty(PO)){
        expression = expression.gt("IBPUST", "69").and(expression.lt("IBPUST", "81")).and(expression.eq("IBPUNO",  String.valueOf(PO)))
      }else{
-       expression = expression.le("IBPUST", "80")        
+       expression = expression.le("IBPUST", "80")   
      }
      
      // List Purchase order line   
-     DBAction actionline = database.table("MPLINE").index("00").matching(expression).selectAllFields().build()   
-     DBContainer line = actionline.getContainer()  
+     //DBAction actionline = database.table("MPLINE").index("00").matching(expression).selectAllFields().build()      //D 20210604
+     DBAction actionline = database.table("MPLINE").index("00").matching(expression).selection("IBCONO", "IBPUNO", "IBPNLI", "IBPNLS", "IBITNO", "IBLPUD", "IBLNAM", "IBPITD", "IBORQA", "IBIVQA", "IBRVQA", "IBPUUN", "IBPPUN", "IBPUST", "IBRGDT", "IBODI1", "IBODI2", "IBODI3", "IBCPPR", "IBCFD1", "IBCFD2", "IBCFD3").build()   //A 20210604 
+     DBContainer line = actionline.getContainer()   
      
      // Read with one key  
      line.set("IBCONO", CONO)  

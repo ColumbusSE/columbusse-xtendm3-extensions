@@ -110,7 +110,8 @@ public class Update extends ExtendM3Transaction {
    int orderline = mi.in.get("PONR") 
    int orderlinesuffix = mi.in.get("POSX") 
      
-   DBAction action = database.table("MGLINE").index("00").selectAllFields().build()
+   //DBAction action = database.table("MGLINE").index("00").selectAllFields().build()                                                                                         //D 20210604
+   DBAction action = database.table("MGLINE").index("00").selection("MRCONO", "MRTRNR", "MRPONR", "MRPOSX", "MRREFE", "MRTWSL", "MRLMDT", "MRCHNO", "MRCHID").build()         //A 20210604
    DBContainer ext = action.getContainer() 
      
    ext.set("MRCONO", companyNum)
@@ -126,8 +127,8 @@ public class Update extends ExtendM3Transaction {
    // Get todays date
    LocalDateTime now = LocalDateTime.now();    
    DateTimeFormatter format1 = DateTimeFormatter.ofPattern("yyyyMMdd");  
-   String formatDate = now.format(format1);     
-         
+   String formatDate = now.format(format1);  
+   
    // Update Change Number
    int ChangeNo = lockedResult.get("MRCHNO") 
    int newChangeNo = ChangeNo + 1 
