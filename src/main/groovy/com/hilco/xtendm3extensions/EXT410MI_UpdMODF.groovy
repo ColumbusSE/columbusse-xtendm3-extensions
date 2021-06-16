@@ -1,3 +1,16 @@
+
+
+/**
+* This extension is used for the update of field MODF in record MHDISH
+*
+* Name: EXT410MI.UpdMODF.groovy
+* 
+* Date         Changed By                         Description 
+* 210225       Frank Zahlten (Columbus)           Update MHDISH/MODF, no standard API exist
+* 
+*/
+
+
 import java.time.LocalDateTime;  
 import java.time.format.DateTimeFormatter;
   
@@ -21,9 +34,12 @@ import java.time.format.DateTimeFormatter;
        mi.write()
        return
     } 
-    UpdRecord() 
+    updRecord() 
   }
   
+  //***************************************************** 
+  // validateInput - Validate entered MODF and CONO
+  //*****************************************************
   boolean validateInput(){
     String company = mi.in.get("CONO") 
     if(validateCompany(company )){  
@@ -32,13 +48,18 @@ import java.time.format.DateTimeFormatter;
     }
     String modf = mi.in.get("MODF")
     int cono = mi.in.get("CONO")
-    if(!validateModf(cono, modf )){  
+    if(!validateModf(cono, modf )){
        mi.error("Mode of delivery " + modf + " is invalid") 
        return true
     }
     return false
   }
   
+  //***************************************************** 
+  // validateCompany - Validate given or retrieved CONO
+  // Input 
+  // Company - from Input
+  //*****************************************************
   boolean validateCompany(String company){  
     // Run MI program 
     def parameter = [CONO: company] 
@@ -48,8 +69,15 @@ import java.time.format.DateTimeFormatter;
      miCaller.call("MNS095MI", "Get", parameter, handler)
   }
   
+  //***************************************************** 
+  // validateModf - Validate given value MODF
+  // Input 
+  // Company - from API
+  // ModeOfDelivery - from input
+  //*****************************************************
   boolean validateModf(int cono, String modf){  
-     DBAction action = database.table("CSYTAB").index("00").selectAllFields().build()
+     //DBAction action = database.table("CSYTAB").index("00").selectAllFields().build()
+     DBAction action = database.table("CSYTAB").index("00").selection("CTCONO", "CTSTCO", "CTSTKY", "CTLNCD").build()
      DBContainer sytab = action.createContainer()
      
      sytab.set("CTCONO", cono)
@@ -62,14 +90,19 @@ import java.time.format.DateTimeFormatter;
      return false
   }
   
-  void UpdRecord(){
+  //***************************************************** 
+  // updRecord - Start update process by reading MHDISH 
+  //             as Inbound, if not exist as outbound
+  //*****************************************************
+  void updRecord(){
      int inbound = 1;
      int outbound = 2;
      int company = mi.in.get("CONO")
      long delivery =  mi.in.get("DLIX")
      String finalMode = mi.in.get("MODF")
      
-     DBAction action = database.table("MHDISH").index("00").selectAllFields().build()
+     //DBAction action = database.table("MHDISH").index("00").selectAllFields().build()
+     DBAction action = database.table("MHDISH").index("00").selection("OQCONO", "OQINOU", "OQDLIX", "OQMODF", "OQCHNO", "OQLMDT", "OQCHID").build()
      DBContainer hdish = action.getContainer()
       
      
@@ -85,7 +118,10 @@ import java.time.format.DateTimeFormatter;
      action.readLock(hdish, updateCallBack)
   }
   
-   Closure<?> updateCallBack = { LockedResult lockedResult -> 
+  //***************************************************** 
+  // updateCallBack - update MHDISH field MODF  
+  //*****************************************************
+  Closure<?> updateCallBack = { LockedResult lockedResult -> 
       // Get todays date
      LocalDateTime now = LocalDateTime.now();    
      DateTimeFormatter format1 = DateTimeFormatter.ofPattern("yyyyMMdd");  
@@ -106,5 +142,5 @@ import java.time.format.DateTimeFormatter;
      lockedResult.set("OQCHNO", newChangeNo) 
      lockedResult.set("OQCHID", program.getUser())
      lockedResult.update()
-     }
+  }
  }
