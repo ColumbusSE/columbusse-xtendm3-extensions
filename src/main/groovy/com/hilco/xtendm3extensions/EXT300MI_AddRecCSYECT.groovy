@@ -6,6 +6,7 @@
  * Date         Changed By                         Description
  * 210902       Frank Zahlten (Columbus)           create records in TXS300 file CSYECT, no standard API exist
  * 211011       Frank Zahlten (Columbus)           additional input field WHLO
+ * 211019       Frank Zahlten (Columbus)           changes based on INFOR review and additional input field FSCU
  */
 
 import java.time.LocalDateTime;
@@ -70,23 +71,29 @@ public class AddRecCSYECT extends ExtendM3Transaction {
 
 		//check BSCD equal CSCD
 		String bscd = mi.in.get("BSCD")
+		bscd = chkInput (bscd)
 		String cscd = mi.in.get("CSCD")
+		cscd = chkInput (cscd)
 		if (cscd.contentEquals(bscd)) {
 			mi.error("Base country code" + bscd + " and supplier/warehouse country code " + cscd +" should not have the same value")
 			return false
 		}
 
-		//smiple check VRCD for ECTP = 3
+		//smiple check VRCD
 		String vrcd = mi.in.get("VRCD") //transaction type
+		vrcd = chkInput (vrcd)
 		String StringECTP = mi.in.get("ECTP") //info type
+		StringECTP = chkInput (StringECTP)
 		String ectp = StringECTP.trim().charAt(0)
+		//
 		String vrcdFirstPosition = vrcd.charAt(0)
-		if (ectp == '2'
-		&&  vrcd.trim().length() > 0) {
-			if  (vrcdFirstPosition > "2") {
-				mi.error("For info type 2 the first digit of the transaction type must be less than 2")
-				return false;
-			}
+		if (vrcd.trim().length() > 0) {
+		  if (ectp == '2') {
+			  if  (vrcdFirstPosition > "2") {
+				  mi.error("For info type 2 the first digit of the transaction type must be less than 2")
+				  return false
+			  }
+		  }
 		}
 		//check VRCD in CSYTAB
 		if(!validateCSYTAB(cono, "VRCD", vrcd , "  " )){
@@ -114,6 +121,7 @@ public class AddRecCSYECT extends ExtendM3Transaction {
 
 		//check customer
 		String cuno = mi.in.get("CUNO") //transaction type
+		cuno = chkInput (cuno)
 		if (ectp == '2'
 		||  ectp == '3'
 		||  ectp == '5') {
@@ -128,6 +136,7 @@ public class AddRecCSYECT extends ExtendM3Transaction {
 
 		//check customs statictic no
 		String csno = mi.in.get("CSNO") //transaction type
+		csno = chkInput (csno)
 		if (!validateCSYCSN(cono, csno)) {
 			mi.error("Customs statistical number " + csno +" does not exist")
 			return false
@@ -135,12 +144,14 @@ public class AddRecCSYECT extends ExtendM3Transaction {
 
 		//check BSCD in CSYTAB
 		bscd = mi.in.get("BSCD") //transaction type
+		bscd = chkInput (bscd)
 		if (!validateCSYTAB(cono, "CSCD", bscd, "  " )) {
 			mi.error("Base country" + bscd +" does not exist")
 			return false
 		}
-
+	//check WHLO in MITWHL
 		String whlo = mi.in.get("WHLO") //
+		whlo = chkInput (whlo)
 		if (!validateMITWHL(cono,whlo)) {
 			mi.error("Warehouse " + whlo +" does not exist")
 			return false
@@ -170,6 +181,7 @@ public class AddRecCSYECT extends ExtendM3Transaction {
 
 		//check trade country
 		String land = mi.in.get("LAND") //trade country
+		land = chkInput (land)
 		if (ectp < '3') {
 			if (!validateCSYTAB(cono, "CSEC", land , "  " )) {
 				mi.error("Trade country" + land +" does not exist")
@@ -179,6 +191,7 @@ public class AddRecCSYECT extends ExtendM3Transaction {
 
 		//check ORCO
 		String orco = mi.in.get("ORCO") //country of origin
+		orco = chkInput (orco)
 		if (ectp != '3') {
 			if (vrcdTS11 == "1") {
 				if (orco.trim().length() == 0) {
@@ -203,6 +216,9 @@ public class AddRecCSYECT extends ExtendM3Transaction {
 		//check country of origin
 		int intEUOR = mi.in.get("EUOR") //country
 		String euor = intEUOR.toString();
+		if (euor == null) {
+		  euor = " "
+		}
 		//mi.error("vor dem check -- Country of origin Wert lautet " + euor )
 		//mi.write();
 		if (euor.trim().length() == 1) {
@@ -220,6 +236,7 @@ public class AddRecCSYECT extends ExtendM3Transaction {
 
 		//check language
 		String lncd = mi.in.get("LNCD")
+		lncd = chkInput (lncd)
 		if (!validateCSYTAB(cono, "LNCD", lncd , "  " )) {
 			mi.error("Language" + lncd +" does not exist")
 			return false
@@ -227,6 +244,7 @@ public class AddRecCSYECT extends ExtendM3Transaction {
 
 		//check delivery method
 		String modl = mi.in.get("MODL")
+		modl = chkInput (modl)
 		if (ectp != '3') {
 			if (vrcdTS09 == "1") {
 				if (modl.trim().length() == 0) {
@@ -252,6 +270,7 @@ public class AddRecCSYECT extends ExtendM3Transaction {
 
 		//check TEDL delivery condition
 		String tedl = mi.in.get("TEDL")
+		tedl = chkInput (tedl)
 		if (ectp != '3') {
 			if (vrcdTS08 == "1") {
 				if (tedl.trim().length() == 0) {
@@ -329,6 +348,7 @@ public class AddRecCSYECT extends ExtendM3Transaction {
 
 		//check ECQT format and value
 		String stringECQT = mi.in.get("ECQT")
+		stringECQT = chkInput (stringECQT)
 		double ECQT = isDouble(stringECQT)
 		if (ECQT == 0d) {
 			mi.error("Quantity ECQT " + stringECQT +" is not valid")
@@ -337,6 +357,7 @@ public class AddRecCSYECT extends ExtendM3Transaction {
 
 		//check ECAM format and value
 		String stringECAM = mi.in.get("ECAM")
+		stringECAM = chkInput (stringECAM)
 		double ECAM = isDouble(stringECAM)
 		if (ECAM == 0d) {
 			mi.error("Amount ECAM " + stringECAM +" is not valid")
@@ -345,6 +366,7 @@ public class AddRecCSYECT extends ExtendM3Transaction {
 
 		//check CUAM format and value
 		String stringCUAM = mi.in.get("CUAM")
+		stringCUAM = chkInput (stringCUAM)
 		double CUAM = isDouble(stringCUAM)
 		if (CUAM == 0d) {
 			mi.error("Amount CUAM " + stringCUAM +" is not valid")
@@ -353,6 +375,7 @@ public class AddRecCSYECT extends ExtendM3Transaction {
 
 		//check LOAM format and value
 		String stringLOAM = mi.in.get("LOAM")
+		stringLOAM = chkInput (stringLOAM)
 		double LOAM = isDouble(stringLOAM)
 		if (LOAM == 0d) {
 			mi.error("Amount LOAM " + stringLOAM +" is not valid")
@@ -361,11 +384,21 @@ public class AddRecCSYECT extends ExtendM3Transaction {
 
 		//check ECNW format and value
 		String stringECNW = mi.in.get("ECNW")
+		stringECNW = chkInput (stringECNW)
 		double ECNW = isDouble(stringECNW)
 		if (ECNW == 0d) {
 			mi.error("Amount ECNW " + stringECNW +" is not valid")
 			return false
 		}
+		
+		//check fiscal currency
+		String fscu = mi.in.get("FSCU")
+		fscu = chkInput (fscu)
+		if (!validateCSYTAB(cono, "CUCD", fscu , "  " )) {
+			mi.error("Currency" + fscu +" does not exist")
+			return false
+		}
+
 
 		return true
 	}
@@ -377,7 +410,7 @@ public class AddRecCSYECT extends ExtendM3Transaction {
 	//*****************************************************
 	String chkInput(String string) {
 		if (string == null) {
-			return " ";
+			return "";
 		}
 		return string;
 	}
@@ -534,48 +567,79 @@ public class AddRecCSYECT extends ExtendM3Transaction {
 
 		int CONO = mi.in.get("CONO")
 		String LNCD = mi.in.get("LNCD")
+		LNCD = chkInput(LNCD)
 		String DIVI =  mi.in.get("DIVI")
+		DIVI = chkInput(DIVI)
 		int ECTP = mi.in.get("ECTP")
 		String REFE = mi.in.get("REFE")
+		REFE = chkInput(REFE)
 		String BSCD = mi.in.get("BSCD")
+		BSCD = chkInput(BSCD)
 		String CUNO = mi.in.get("CUNO")
+		CUNO = chkInput(CUNO)
 		String CSNO = mi.in.get("CSNO")
+		CSNO = chkInput(CSNO)
 		String CSCD = mi.in.get("CSCD")
+		CSCD = chkInput(CSCD)
 		int EUOR = mi.in.get("EUOR")
 		String ORCO = mi.in.get("ORCO")
+		ORCO = chkInput(ORCO)
 		String YEA4 = mi.in.get("YEA4")
+		YEA4 = chkInput(YEA4)
 		String SINO = mi.in.get("SINO")
+		SINO = chkInput(SINO)
 		int IVDT = mi.in.get("IVDT")
 		int ACDT = mi.in.get("ACDT")
 		String VRCD = mi.in.get("VRCD")
+		VRCD = chkInput(VRCD)
 		String VRDL = mi.in.get("VRDL")
+		VRDL = chkInput(VRDL)
 		String LAND = mi.in.get("LAND")
+		LAND = chkInput(LAND)
 		String TEDL = mi.in.get("TEDL")
+		TEDL = chkInput(TEDL)
 		String MODL = mi.in.get("MODL")
+		MODL = chkInput(MODL)
 		String stringECQT = mi.in.get("ECQT")
+		stringECQT = chkInput(stringECQT)
 		double ECQT = isDouble(stringECQT)
 		String ECLC = mi.in.get("ECLC")
+		ECLC = chkInput(ECLC)
 		String ECCC = mi.in.get("ECCC")
+		ECCC = chkInput(ECCC)
 		String stringECAM = mi.in.get("ECAM")
+		stringECAM = chkInput(stringECAM)
 		double ECAM = isDouble(stringECAM)
 		String stringECNW = mi.in.get("ECNW")
+		stringECNW = chkInput(stringECNW)
 		double ECNW = isDouble(stringECNW)
 		String stringCUAM = mi.in.get("CUAM")
+		stringCUAM = chkInput(stringCUAM)
 		double CUAM = isDouble(stringCUAM)
 		String stringLOAM = mi.in.get("LOAM")
+		stringLOAM = chkInput(stringLOAM)
 		double LOAM = isDouble(stringLOAM)
 		String FSVL = mi.in.get("FSVL")
+		FSVL = chkInput(FSVL)
 		String CSPY = mi.in.get("CSPY")
+		CSPY = chkInput(CSPY)
 		int DLDT = mi.in.get("DLDT")
 		long SSVL = mi.in.get("SSVL")
 		String VRNO = mi.in.get("VRNO")
+		VRNO = chkInput(VRNO)
 		String VRIN = mi.in.get("VRIN")
+		VRIN = chkInput(VRIN)
 		String WHLO = mi.in.get("WHLO")
-		String WHCD = mitwhlWHCD;
-		String ECAR = mitwhlECAR;
+		WHLO = chkInput(WHLO)
+		String WHCD = mitwhlWHCD
+		String ECAR = mitwhlECAR
+		String FSCU = mi.in.get("FSCU")
+		FSCU = chkInput(FSCU)
 
-		//DBAction action = database.table("MHDISH").index("00").selectAllFields().build()
-		DBAction action = database.table("CSYECT").index("00").selectAllFields().build()
+		//DBAction action = database.table("CSYECT").index("00").selectAllFields().build()
+		DBAction action = database.table("CSYECT").index("00").selection("CWCONO", "CWDIVI", "CWECTP", "CWREFE", "CWCHID", "CWRGDT", "CWRGTM", "CWLNCD",
+			"CWBSCD", "CWCUSP", "CWCSNO","CWCSCD", "CWIISO","CWORCO","CWYEA4", "CWSINO", "CWVRCD", "CWVRDL","CWLAND","CWTEDL","CWMODL","CWECLC","CWECCC",
+			"CWECQT","CWECAM","CWCUAM","CWECNW","CWLOAM","CWFSVL","CWCSPY","CWDLDT", "CWSSVL", "CWVRNO","CWVRIN","CWWHLO", "CWWHCD","CWECAR","CWCHNO", "CWFSCU").build()
 		DBContainer syect = action.getContainer()
 
 		//check that the record isn't already existing
@@ -590,7 +654,7 @@ public class AddRecCSYECT extends ExtendM3Transaction {
 			return false
 		}
 
-		if (!isNullOrEmpty(LNCD)){
+if (!isNullOrEmpty(LNCD)){
 			syect.set("CWLNCD", mi.in.get("LNCD"))
 		} else {
 			syect.set("CWLNCD", ' ')
@@ -717,6 +781,11 @@ public class AddRecCSYECT extends ExtendM3Transaction {
 			syect.set("CWECAR", ECAR)
 		} else {
 			syect.set("CWECAR", ' ')
+		}
+		if (!isNullOrEmpty(FSCU)){
+			syect.set("CWFSCU", mi.in.get("FSCU"))
+		} else {
+			syect.set("CWFSCU", ' ')
 		}
 
 		syect.set("CWCHID", program.getUser())
