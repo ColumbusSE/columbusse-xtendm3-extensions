@@ -31,6 +31,9 @@ public class LstVendor extends ExtendM3Transaction {
   public int InADTE
   public String InADID
   public int InCONO  
+  public String Address1
+  public String Postal
+  public String Town
     
   // Definition of output fields
   public String OutSUNO  
@@ -87,7 +90,7 @@ public class LstVendor extends ExtendM3Transaction {
     return Optional.empty()
   }
   
-  //******************************************************************** 
+    //******************************************************************** 
   // Get Supplier address information CIDADR
   //******************************************************************** 
   private Optional<DBContainer> findCIDADR(Integer CONO, String SUNO, Integer ADTE, String ADID){  
@@ -97,12 +100,23 @@ public class LstVendor extends ExtendM3Transaction {
     CIDADR.set("SASUNO", SUNO)
     CIDADR.set("SAADTE", ADTE)
     CIDADR.set("SAADID", ADID)
-    //CIDADR.set("SASTDT", 20080101)
-    if(query.read(CIDADR))  { 
+    if(query.readAll(CIDADR, 4, addressProcessor))  { 
       return Optional.of(CIDADR)
     } 
   
     return Optional.empty()
+  }
+  
+  //******************************************************************** 
+  // List Address from CIDADR
+  //********************************************************************  
+  Closure<?> addressProcessor = { DBContainer CIDADR ->   
+  
+    String Suppl = CIDADR.getString("SASUNO")
+    Address1 = CIDADR.getString("SAADR1")
+    Town = CIDADR.getString("SATOWN")
+    Postal = CIDADR.getString("SAPONO")
+
   }
 
   
@@ -162,7 +176,6 @@ public class LstVendor extends ExtendM3Transaction {
   //******************************************************************** 
   void SetOutPut() {
      
-    //mi.outData.put("CONO", OutCONO) 
     mi.outData.put("SUNO", OutSUNO)
     mi.outData.put("SUNM", OutSUNM)
     mi.outData.put("STAT", OutSTAT)
@@ -188,14 +201,10 @@ public class LstVendor extends ExtendM3Transaction {
      // List all Purchase Order lines
      ExpressionFactory expression = database.getExpressionFactory("CIDMAS")
    
-     // Depending on input value (Status)
-     // If status is blank, read all, else read only with the input status
      expression = expression.eq("IDSTAT", String.valueOf(InSTAT))
 
      // List Purchase order line   
-     //DBAction actionline = database.table("CIDMAS").index("00").matching(expression).selectAllFields().build()   //D 20210604
-     DBAction actionline = database.table("CIDMAS").index("00").matching(expression).selection("IDCONO", "IDSUNO", "IDSUNM", "IDSTAT", "IDPHNO", "IDTFNO", "IDCSCD", "IDECAR", "IDVRNO").build()   //A 20210604 
-
+     DBAction actionline = database.table("CIDMAS").index("00").matching(expression).selectAllFields().build()   
      DBContainer line = actionline.getContainer()  
      
      // Read with one key  
@@ -241,9 +250,10 @@ public class LstVendor extends ExtendM3Transaction {
   if(CIDADR.isPresent()){
     // Record found, continue to get information  
     DBContainer containerCIDADR = CIDADR.get() 
-    OutADR1 = containerCIDADR.getString("SAADR1")   
-    OutTOWN = containerCIDADR.getString("SATOWN")   
-    OutPONO = containerCIDADR.getString("SAPONO")   
+    OutADR1 = Address1
+    OutTOWN = Town  
+    OutPONO = Postal 
+ 
   } else {
     OutADR1 = ""
     OutTOWN = ""
@@ -260,7 +270,6 @@ public class LstVendor extends ExtendM3Transaction {
     OutEMAL = ""
   }
 
-    
   // Send Output
   SetOutPut()
   mi.write() 

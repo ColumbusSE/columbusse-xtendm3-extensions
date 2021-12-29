@@ -108,7 +108,8 @@ public class LstComplete extends ExtendM3Transaction {
   public String OutGRIA
   public String OutTIVA
   public String OutIVNA
-  public String OutFACT    
+  public String OutFACT  
+  public String OutVTCD
   
   
   // Constructor 
@@ -338,7 +339,8 @@ public class LstComplete extends ExtendM3Transaction {
     mi.outData.put("GRIA", OutGRIA)
     mi.outData.put("TIVA", OutTIVA)
     mi.outData.put("IVNA", OutIVNA) 
-    mi.outData.put("FACT", OutFACT)    
+    mi.outData.put("FACT", OutFACT) 
+    mi.outData.put("VTCD", OutVTCD)    
     
   } 
     
@@ -362,8 +364,7 @@ public class LstComplete extends ExtendM3Transaction {
      }
      
      // List Purchase order line   
-     //DBAction actionline = database.table("MPLINE").index("00").matching(expression).selectAllFields().build()      //D 20210604
-     DBAction actionline = database.table("MPLINE").index("00").matching(expression).selection("IBCONO", "IBPUNO", "IBPNLI", "IBPNLS", "IBITNO", "IBLPUD", "IBLNAM", "IBPITD", "IBORQA", "IBIVQA", "IBRVQA", "IBPUUN", "IBPPUN", "IBPUST", "IBRGDT", "IBODI1", "IBODI2", "IBODI3", "IBCPPR", "IBCFD1", "IBCFD2", "IBCFD3").build()   //A 20210604 
+     DBAction actionline = database.table("MPLINE").index("00").matching(expression).selection("IBCONO", "IBPUNO", "IBPNLI", "IBPNLS", "IBITNO", "IBLPUD", "IBLNAM", "IBPITD", "IBORQA", "IBIVQA", "IBRVQA", "IBPUUN", "IBPPUN", "IBPUST", "IBRGDT", "IBODI1", "IBODI2", "IBODI3", "IBCPPR", "IBCFD1", "IBCFD2", "IBCFD3", "IBVTCD").build()   //A 20210604 
      DBContainer line = actionline.getContainer()   
      
      // Read with one key  
@@ -391,6 +392,7 @@ public class LstComplete extends ExtendM3Transaction {
   OutITNO = String.valueOf(line.get("IBITNO"))  
   OutLNAM = String.valueOf(line.get("IBLNAM"))
   OutPITD = String.valueOf(line.get("IBPITD"))
+  OutVTCD = String.valueOf(line.get("IBVTCD"))
 
   // Fields for calculation
   ORQA = line.get("IBORQA")
@@ -518,7 +520,16 @@ public class LstComplete extends ExtendM3Transaction {
     ConfirmedPrice = line.get("IBCPPR")
     LineAmount = line.get("IBLNAM")
     LineQty = line.get("IBORQA") 
+    AccRecCostAmount = 0    //A 20211115
+    AccRecExcRate = 0       //A 20211115
+    AccRecQty = 0          //A 20211115
+    ResultDiscount = 0     //A 20211115
+    AccResult = 0          //A 20211115
+
+    ResultConfirmedDiscount = 0  //A 20211115
+   
     
+
     if(ConfirmedPrice == 0d){
       // Calculate confirmed price from receiving lines
       ResultDiscount = (1 - (0.01 * Discount1)) * (1 - (0.01 * Discount2)) * (1 - (0.01 * Discount3))
@@ -530,11 +541,14 @@ public class LstComplete extends ExtendM3Transaction {
         SERA = RecLine.get("F2SERA") 
         IVQT = RecLine.get("F2IVQT")  
    
+        logger.info("RCAC = ${RCAC}")     //A 20211111
+        logger.info("SERA = ${SERA}")     //A 20211111
+        logger.info("IVQT = ${IVQT}")     //A 20211111
+   
         AccRecCostAmount =+ RCAC 
         AccRecExcRate =+ SERA
         AccRecQty =+ IVQT * LineAmount 
-   
-    
+        
         if(AccRecExcRate != 0){
           AccResult = (AccRecCostAmount / AccRecExcRate)  * ResultDiscount 
           BigDecimal RecConfirmedPrice  = BigDecimal.valueOf(AccResult) 
@@ -601,7 +615,17 @@ public class LstComplete extends ExtendM3Transaction {
    
      
     // Loop and send to output Rec invoice line information   
+    OutSUDO = ""  //A 20211115
+    OutRPQT = ""  //A 20211115
+    OutTRDT = ""  //A 20211115
+    OutREPN = ""  //A 20211115
+    OutGRIQ = ""  //A 20211115
+    OutGRAM = ""  //A 20211115
+    OutCOMP = ""  //A 20211115
+    OutDEAL = ""  //A 20211115
+
     AlreadySentOut = false
+    PurchaseOrder = line.get("IBPUNO")   //A 20211115
     PurchaseLine = line.get("IBPNLI") 
     PurchaseSuffix = line.get("IBPNLS")  
     List<DBContainer> ResultFGRECL = ListFGRECL(Company, Division, PurchaseOrder, PurchaseLine, PurchaseSuffix) 
@@ -629,13 +653,18 @@ public class LstComplete extends ExtendM3Transaction {
         RecConfirmedPrice = RecConfirmedPrice.setScale(2, RoundingMode.HALF_UP) 
         if(RecConfirmedPrice == 0d){  
           OutDEAL = String.valueOf(0)  
+          OutGRAM = String.valueOf(0)  
         }else{ 
           OutDEAL = String.valueOf(RecConfirmedPrice)
+          OutGRAM = String.valueOf(RecConfirmedPrice)
         } 
       }else{  
         OutDEAL = String.valueOf(0)  
+        OutGRAM = String.valueOf(0) 
       } 
     
+      OutGRIQ = ""   //A 20211115
+      OutGRIA = ""   //A 20211115
       // Get Rec invoice line information  (FGINLI)  
       // - rec number level   
       List<DBContainer> ResultFGINLIRec = ListFGINLI(Company, PurchaseOrder, PurchaseLine, PurchaseSuffix, RecNumber) 
@@ -653,6 +682,7 @@ public class LstComplete extends ExtendM3Transaction {
       
       // - line level 
       RecNumber = 0
+      OutTIVA = ""  //A 20211115
       List<DBContainer> ResultFGINLILine = ListFGINLI(Company, PurchaseOrder, PurchaseLine, PurchaseSuffix, RecNumber) 
       for (DBContainer InvLine : ResultFGINLILine){  
         // Accumulate amount   
@@ -666,6 +696,7 @@ public class LstComplete extends ExtendM3Transaction {
       PurchaseLine = 0
       PurchaseSuffix = 0
       RecNumber = 0
+      OutIVNA = ""  //A 20211115
       List<DBContainer> ResultFGINLIHead = ListFGINLI(Company, PurchaseOrder, PurchaseLine, PurchaseSuffix, RecNumber) 
         for (DBContainer InvLine : ResultFGINLIHead){  
           // Accumulate quantity  
