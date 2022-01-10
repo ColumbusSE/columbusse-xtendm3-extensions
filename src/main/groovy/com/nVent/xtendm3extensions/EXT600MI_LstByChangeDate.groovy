@@ -24,80 +24,79 @@ public class LstByChangeDate extends ExtendM3Transaction {
 
   
   // Definition 
-  public int Company 
-  public String Division
-  public int ChangeDate
-  public int DeliveryNumber
-  public int InvoiceNumber
-  public String OrderNumber
-  public String ItemNumber
-  public int OrderLine
-  public int OrderLineSuffix
-  public String Warehouse
-  public String PaymentTerms
-  public String InvoiceDate
-  public String DeliveryTerms
-  public String Year
-  public String Customer
-  public String CurrencyCode
-  public String LanguageCode
-  public String CompanyString
-  public String DeliveryNumberString
-  public String OrderLineString
-  public String OrderLineSuffixString
-  public String OrderStatus
-  public String SalesPrice
-  public String NetPrice
-  public String LineAmount
-  public int SentFlag
-  public int InCONO
-  public int InLMDT 
-  public long AttributeNumber
+  public int company 
+  public String division
+  public int deliveryNumber
+  public int invoiceNumber
+  public String orderNumber
+  public String itemNumber
+  public int orderLine
+  public int orderLineSuffix
+  public String warehouse
+  public String paymentTerms
+  public String invoiceDate
+  public String deliveryTerms
+  public String year
+  public String customer
+  public String currencyCode
+  public String languageCode
+  public String companyString
+  public String deliveryNumberString
+  public String orderLineString
+  public String orderLineSuffixString
+  public String orderStatus
+  public String salesPrice
+  public String netPrice
+  public String lineAmount
+  public int sentFlag
+  public int inCONO
+  public int inLMDT 
+  public long attributeNumber
 
   // Definition of output fields
-  public String OutIVNO
-  public String OutIVDT
-  public String OutCUNO 
-  public String OutCUCD
-  public String OutTEPY 
-  public String OutITNO  
-  public String OutITDS  
-  public String OutLTYP  
-  public String OutSPUN  
-  public String OutQTY6  
-  public String OutQTY4  
-  public String OutDCOS
-  public String OutSAPR
-  public String OutNEPR
-  public String OutLNAM
-  public String OutHIE1
-  public String OutHIE2
-  public String OutHIE3
-  public String OutHIE4
-  public String OutHIE5
-  public String OutFACI
-  public String OutORTP
-  public String OutADID
-  public String OutORNO
-  public String OutRSCD
-  public String OutTEDL
-  public String OutTEL1
-  public String OutSMCD
-  public String OutWCON
-  public String OutORDT
-  public String OutOFNO
-  public String OutAGNO
-  public String OutORST
-  public String OutDLIX
-  public String OutADRT
-  public String OutCONO
-  public String OutNAME
-  public String OutTOWN
-  public String OutCSCD
-  public String OutPONO
-  public String OutLOCD
-  public String OutATAV
-  public String OutYEA4
+  public String outIVNO
+  public String outIVDT
+  public String outCUNO 
+  public String outCUCD
+  public String outTEPY 
+  public String outITNO  
+  public String outITDS  
+  public String outLTYP  
+  public String outSPUN  
+  public String outQTY6  
+  public String outQTY4  
+  public String outDCOS
+  public String outSAPR
+  public String outNEPR
+  public String outLNAM
+  public String outHIE1
+  public String outHIE2
+  public String outHIE3
+  public String outHIE4
+  public String outHIE5
+  public String outFACI
+  public String outORTP
+  public String outADID
+  public String outORNO
+  public String outRSCD
+  public String outTEDL
+  public String outTEL1
+  public String outSMCD
+  public String outWCON
+  public String outORDT
+  public String outOFNO
+  public String outAGNO
+  public String outORST
+  public String outDLIX
+  public String outADRT
+  public String outCONO
+  public String outNAME
+  public String outTOWN
+  public String outCSCD
+  public String outPONO
+  public String outLOCD
+  public String outATAV
+  public String outYEA4
 
 
   // Constructor 
@@ -109,10 +108,25 @@ public class LstByChangeDate extends ExtendM3Transaction {
      this.miCaller = miCaller;
   } 
      
-     
+  
+  //******************************************************************** 
+  // Main 
+  //********************************************************************  
+  public void main() { 
+      // Get LDA company of not entered 
+      int inCONO = getCONO()  
+      
+      inCONO = mi.in.get("CONO")  
+      inLMDT = mi.in.get("LMDT")  
+
+      // Start the listing in CIDMAS
+      LstInvoiceLines()
+   
+  }
+  
                 
   //******************************************************************** 
-  // Get Company from LDA
+  // Get company from LDA
   //******************************************************************** 
   private Integer getCONO() {
     int company = mi.in.get("CONO") as Integer
@@ -246,15 +260,14 @@ public class LstByChangeDate extends ExtendM3Transaction {
    // Delivery Number
    // Address Type
    //***************************************************************************** 
-   private getDeliveryAddress(String Company, String DeliveryNumber, String AddressType){   
-        def params = [CONO: CompanyString, DLIX: DeliveryNumberString, ADRT: "01"] 
+   private getDeliveryAddress(String company, String deliveryNumber, String AddressType){   
+        def params = [CONO: companyString, DLIX: deliveryNumberString, ADRT: "01"] 
         String name = null
         String town = null
         String country = null
         String postalCode = null
         def callback = {
         Map<String, String> response ->
-        logger.info("Response = ${response}")
         if(response.NAME != null){
           name = response.NAME 
         }
@@ -271,10 +284,10 @@ public class LstByChangeDate extends ExtendM3Transaction {
 
         miCaller.call("MWS410MI","GetAdr", params, callback)
       
-        OutNAME = name
-        OutTOWN = town
-        OutCSCD = country
-        OutPONO = postalCode
+        outNAME = name
+        outTOWN = town
+        outCSCD = country
+        outPONO = postalCode
    } 
 
    //***************************************************************************** 
@@ -288,14 +301,13 @@ public class LstByChangeDate extends ExtendM3Transaction {
    // Line Suffix
    // Payment Terms
    //***************************************************************************** 
-   private getAdditionalDelLineInfo(String Company, String OrderNumber, String DeliveryNumber, String Warehouse, String OrderLine, String OrderLineSuffix, String PaymentTerms){   
-        def params = [CONO: CompanyString, ORNO: OrderNumber, DLIX: DeliveryNumberString, WHLO: Warehouse, PONR: OrderLine, POSX: OrderLineSuffix, TEPY: PaymentTerms] 
+   private getAdditionalDelLineInfo(String company, String orderNumber, String deliveryNumber, String warehouse, String orderLine, String orderLineSuffix, String paymentTerms){   
+        def params = [CONO: companyString, ORNO: orderNumber, DLIX: deliveryNumberString, WHLO: warehouse, PONR: orderLine, POSX: orderLineSuffix, TEPY: paymentTerms] 
         String invQty = null
         String delQty = null
         String costAmount = null
         def callback = {
         Map<String, String> response ->
-        logger.info("Response = ${response}")
         if(response.QTY4 != null){
           invQty = response.QTY4 
         }
@@ -309,9 +321,9 @@ public class LstByChangeDate extends ExtendM3Transaction {
 
         miCaller.call("OIS350MI","GetDelLine", params, callback)
       
-        OutQTY4 = invQty
-        OutQTY6 = delQty
-        OutDCOS = costAmount
+        outQTY4 = invQty
+        outQTY6 = delQty
+        outDCOS = costAmount
    } 
 
    //***************************************************************************** 
@@ -320,12 +332,11 @@ public class LstByChangeDate extends ExtendM3Transaction {
    // Company
    // Delivery Number
    //***************************************************************************** 
-   private getDivisionInfo(String Company, String Division){   
-        def params = [CONO: CompanyString, DIVI: Division] 
+   private getDivisionInfo(String company, String division){   
+        def params = [CONO: companyString, DIVI: division] 
         String localCurrency = null
         def callback = {
         Map<String, String> response ->
-        logger.info("Response = ${response}")
         if(response.LOCD != null){
           localCurrency = response.LOCD
         }
@@ -333,7 +344,7 @@ public class LstByChangeDate extends ExtendM3Transaction {
 
         miCaller.call("MNS100MI","GetBasicData", params, callback)
       
-        OutLOCD = localCurrency
+        outLOCD = localCurrency
    } 
    
   //******************************************************************** 
@@ -365,18 +376,18 @@ public class LstByChangeDate extends ExtendM3Transaction {
    // Warehouse
    // Payment Terms
    //***************************************************************************** 
-   void UpdEXTPFX(){ 
+   void updEXTPFX(){ 
      DBAction action = database.table("EXTPFX").index("00").selectAllFields().build()
      DBContainer ext = action.getContainer()
       
      //Set key fields
-     ext.set("EXCONO", Company)
-     ext.set("EXORNO", OrderNumber)
-     ext.set("EXPONR", OrderLine)
-     ext.set("EXPOSX", OrderLineSuffix)
-     ext.set("EXDLIX", DeliveryNumber)
-     ext.set("EXWHLO", Warehouse)
-     ext.set("EXTEPY", PaymentTerms)
+     ext.set("EXCONO", company)
+     ext.set("EXORNO", orderNumber)
+     ext.set("EXPONR", orderLine)
+     ext.set("EXPOSX", orderLineSuffix)
+     ext.set("EXDLIX", deliveryNumber)
+     ext.set("EXWHLO", warehouse)
+     ext.set("EXTEPY", paymentTerms)
      
      // Read with lock
      action.readLock(ext, updateCallBack)
@@ -416,23 +427,23 @@ public class LstByChangeDate extends ExtendM3Transaction {
    // Warehouse
    // Payment Terms
    //***************************************************************************** 
-   void AddEXTPFX(){ 
+   void addEXTPFX(){ 
      DBAction action = database.table("EXTPFX").index("00").selectAllFields().build()
      DBContainer ext = action.createContainer()
      
      //Set key fields
-     ext.set("EXCONO", Company)
-     ext.set("EXORNO", OrderNumber)
-     ext.set("EXPONR", OrderLine)
-     ext.set("EXPOSX", OrderLineSuffix)
-     ext.set("EXDLIX", DeliveryNumber)
-     ext.set("EXWHLO", Warehouse)
-     ext.set("EXTEPY", PaymentTerms)
+     ext.set("EXCONO", company)
+     ext.set("EXORNO", orderNumber)
+     ext.set("EXPONR", orderLine)
+     ext.set("EXPOSX", orderLineSuffix)
+     ext.set("EXDLIX", deliveryNumber)
+     ext.set("EXWHLO", warehouse)
+     ext.set("EXTEPY", paymentTerms)
      
      //Set flag
      ext.set("EXEPFX", 1);
      
-     ext.set("EXDIVI", Division)
+     ext.set("EXDIVI", division)
    
      ext.set("EXCHID", program.getUser())
      ext.set("EXCHNO", 1) 
@@ -451,20 +462,6 @@ public class LstByChangeDate extends ExtendM3Transaction {
      action.insert(ext)  
      } 
  
-  //******************************************************************** 
-  // Main 
-  //********************************************************************  
-  public void main() { 
-      // Get LDA company of not entered 
-      int InCONO = getCONO()  
-      
-      InCONO = mi.in.get("CONO")  
-      InLMDT = mi.in.get("LMDT")  
-
-      // Start the listing in CIDMAS
-      LstInvoiceLines()
-   
-  }
  
   //******************************************************************** 
   // Check if null or empty
@@ -487,49 +484,49 @@ public class LstByChangeDate extends ExtendM3Transaction {
   //******************************************************************** 
   // Set Output data
   //******************************************************************** 
-  void SetOutPut() {
-    mi.outData.put("IVNO", OutIVNO)
-    mi.outData.put("IVDT", OutIVDT)
-    mi.outData.put("CUNO", OutCUNO)
-    mi.outData.put("CUCD", OutCUCD)  
-    mi.outData.put("TEPY", OutTEPY)  
-    mi.outData.put("ITNO", OutITNO)  
-    mi.outData.put("ITDS", OutITDS)  
-    mi.outData.put("LTYP", OutLTYP)  
-    mi.outData.put("SPUN", OutSPUN)  
-    mi.outData.put("QTY6", OutQTY6)  
-    mi.outData.put("QTY4", OutQTY4)  
-    mi.outData.put("DCOS", OutDCOS)
-    mi.outData.put("SAPR", OutSAPR)
-    mi.outData.put("NEPR", OutNEPR)
-    mi.outData.put("LNAM", OutLNAM)
-    mi.outData.put("HIE1", OutHIE1)
-    mi.outData.put("HIE2", OutHIE2)
-    mi.outData.put("HIE3", OutHIE3)
-    mi.outData.put("HIE4", OutHIE4)
-    mi.outData.put("HIE5", OutHIE5)
-    mi.outData.put("FACI", OutFACI)
-    mi.outData.put("ORTP", OutORTP)
-    mi.outData.put("ORNO", OutORNO)
-    mi.outData.put("WCON", OutWCON)
-    mi.outData.put("ADID", OutADID)
-    mi.outData.put("RSCD", OutRSCD)
-    mi.outData.put("SMCD", OutSMCD)
-    mi.outData.put("OFNO", OutOFNO)
-    mi.outData.put("ORDT", OutORDT)
-    mi.outData.put("AGNO", OutAGNO)
-    mi.outData.put("ORST", OutORST)
-    mi.outData.put("NAME", OutNAME)
-    mi.outData.put("TOWN", OutTOWN)
-    mi.outData.put("CSCD", OutCSCD)
-    mi.outData.put("PONO", OutPONO)
-    mi.outData.put("LOCD", OutLOCD)
-    mi.outData.put("DLIX", OutDLIX)
-    mi.outData.put("ATVN", OutATAV)
-    mi.outData.put("YEA4", OutYEA4)
-    mi.outData.put("IVDT", OutIVDT)
-    mi.outData.put("TEDL", OutTEDL)
-    mi.outData.put("TEL1", OutTEL1)
+  void setOutput() {
+    mi.outData.put("IVNO", outIVNO)
+    mi.outData.put("IVDT", outIVDT)
+    mi.outData.put("CUNO", outCUNO)
+    mi.outData.put("CUCD", outCUCD)  
+    mi.outData.put("TEPY", outTEPY)  
+    mi.outData.put("ITNO", outITNO)  
+    mi.outData.put("ITDS", outITDS)  
+    mi.outData.put("LTYP", outLTYP)  
+    mi.outData.put("SPUN", outSPUN)  
+    mi.outData.put("QTY6", outQTY6)  
+    mi.outData.put("QTY4", outQTY4)  
+    mi.outData.put("DCOS", outDCOS)
+    mi.outData.put("SAPR", outSAPR)
+    mi.outData.put("NEPR", outNEPR)
+    mi.outData.put("LNAM", outLNAM)
+    mi.outData.put("HIE1", outHIE1)
+    mi.outData.put("HIE2", outHIE2)
+    mi.outData.put("HIE3", outHIE3)
+    mi.outData.put("HIE4", outHIE4)
+    mi.outData.put("HIE5", outHIE5)
+    mi.outData.put("FACI", outFACI)
+    mi.outData.put("ORTP", outORTP)
+    mi.outData.put("ORNO", outORNO)
+    mi.outData.put("WCON", outWCON)
+    mi.outData.put("ADID", outADID)
+    mi.outData.put("RSCD", outRSCD)
+    mi.outData.put("SMCD", outSMCD)
+    mi.outData.put("OFNO", outOFNO)
+    mi.outData.put("ORDT", outORDT)
+    mi.outData.put("AGNO", outAGNO)
+    mi.outData.put("ORST", outORST)
+    mi.outData.put("NAME", outNAME)
+    mi.outData.put("TOWN", outTOWN)
+    mi.outData.put("CSCD", outCSCD)
+    mi.outData.put("PONO", outPONO)
+    mi.outData.put("LOCD", outLOCD)
+    mi.outData.put("DLIX", outDLIX)
+    mi.outData.put("ATVN", outATAV)
+    mi.outData.put("YEA4", outYEA4)
+    mi.outData.put("IVDT", outIVDT)
+    mi.outData.put("TEDL", outTEDL)
+    mi.outData.put("TEL1", outTEL1)
   } 
     
   //******************************************************************** 
@@ -541,7 +538,7 @@ public class LstByChangeDate extends ExtendM3Transaction {
      ExpressionFactory expression = database.getExpressionFactory("ODLINE")
    
      // Depending on input value (Change Date)
-     expression = expression.eq("UBLMDT", String.valueOf(InLMDT))
+     expression = expression.eq("UBLMDT", String.valueOf(inLMDT))
 
      // List Invoice Delivery Lines   
      DBAction actionline = database.table("ODLINE").index("00").matching(expression).selection("UBCONO", "UBLMDT", "UBORNO", "UBPONR", "UBPOSX", "UBWHLO", "UBTEPY", "UBIVNO", "UBITNO", "UBLTYP", "UBSPUN", "UBSAPR", "UBNEPR", "UBLNAM", "UBDCOS").build()  
@@ -550,7 +547,7 @@ public class LstByChangeDate extends ExtendM3Transaction {
      
      // Read with one key  
      line.set("UBCONO", CONO)  
-     actionline.readAll(line, 1, releasedLineProcessor)   
+     actionline.readAll(line, 1, mi.getMaxRecords(), releasedLineProcessor)   
    
    } 
  
@@ -561,168 +558,168 @@ public class LstByChangeDate extends ExtendM3Transaction {
   Closure<?> releasedLineProcessor = { DBContainer line ->   
   
   // Fields from ODHEAD to use in the other read
-  Company = line.get("UBCONO")
-  Division = line.get("UBDIVI")
-  DeliveryNumber = line.get("UBDLIX") 
-  InvoiceNumber = line.get("UBIVNO") 
-  OrderNumber = line.get("UBORNO")
-  OrderLine = line.get("UBPONR")
-  OrderLineSuffix = line.get("UBPOSX")
-  PaymentTerms = line.get("UBTEPY")
-  Warehouse = line.get("UBWHLO")
-  ItemNumber = line.get("UBITNO")
-  OrderLineString = line.get("UBPONR")
-  OrderLineSuffixString = line.get("UBPOSX")
-  SalesPrice = line.get("UBSAPR")
-  NetPrice = line.get("UBNEPR")
-  LineAmount = line.get("UBLNAM")
+  company = line.get("UBCONO")
+  division = line.get("UBDIVI")
+  deliveryNumber = line.get("UBDLIX") 
+  invoiceNumber = line.get("UBIVNO") 
+  orderNumber = line.get("UBORNO")
+  orderLine = line.get("UBPONR")
+  orderLineSuffix = line.get("UBPOSX")
+  paymentTerms = line.get("UBTEPY")
+  warehouse = line.get("UBWHLO")
+  itemNumber = line.get("UBITNO")
+  orderLineString = line.get("UBPONR")
+  orderLineSuffixString = line.get("UBPOSX")
+  salesPrice = line.get("UBSAPR")
+  netPrice = line.get("UBNEPR")
+  lineAmount = line.get("UBLNAM")
   
   
   // Get Sent flag from EXTPFX 
-  Optional<DBContainer> EXTPFX = findEXTPFX(Company, OrderNumber, OrderLine, OrderLineSuffix, DeliveryNumber, Warehouse, PaymentTerms)
+  Optional<DBContainer> EXTPFX = findEXTPFX(company, orderNumber, orderLine, orderLineSuffix, deliveryNumber, warehouse, paymentTerms)
   if(EXTPFX.isPresent()){
     // Record found, continue to get information  
     DBContainer containerEXTPFX = EXTPFX.get() 
     
-    SentFlag = containerEXTPFX.get("EXEPFX")  
+    sentFlag = containerEXTPFX.get("EXEPFX")  
 
   } 
  
   
   // Get Delivery Head Info 
-  Optional<DBContainer> ODHEAD = findODHEAD(Company, OrderNumber, Warehouse, DeliveryNumber, PaymentTerms)
+  Optional<DBContainer> ODHEAD = findODHEAD(company, orderNumber, warehouse, deliveryNumber, paymentTerms)
   if(ODHEAD.isPresent()){
     // Record found, continue to get information  
     DBContainer containerODHEAD = ODHEAD.get() 
     
-    CompanyString = containerODHEAD.get("UACONO")  
-    DeliveryNumberString = containerODHEAD.get("UADLIX")  
-    OrderStatus = containerODHEAD.getString("UAORST")
-    Customer = containerODHEAD.getString("UACUNO")  
-    CurrencyCode = containerODHEAD.getString("UACUCD")   
-    PaymentTerms = containerODHEAD.getString("UATEPY")  
-    DeliveryTerms = containerODHEAD.getString("UATEDL")  
-    InvoiceDate = String.valueOf(containerODHEAD.get("UAIVDT"))  
-    Year = String.valueOf(containerODHEAD.get("UAYEA4"))  
+    companyString = containerODHEAD.get("UACONO")  
+    deliveryNumberString = containerODHEAD.get("UADLIX")  
+    orderStatus = containerODHEAD.getString("UAORST")
+    customer = containerODHEAD.getString("UACUNO")  
+    currencyCode = containerODHEAD.getString("UACUCD")   
+    paymentTerms = containerODHEAD.getString("UATEPY")  
+    deliveryTerms = containerODHEAD.getString("UATEDL")  
+    invoiceDate = String.valueOf(containerODHEAD.get("UAIVDT"))  
+    year = String.valueOf(containerODHEAD.get("UAYEA4"))  
     
   } 
   
   
-  if (OrderStatus >= "70") {
-        OutCONO = String.valueOf(line.get("UBCONO"))
-        OutDLIX = String.valueOf(line.get("UBDLIX"))
-        OutIVNO = String.valueOf(line.get("UBIVNO")) 
-        OutITNO = String.valueOf(line.get("UBITNO"))  
-        OutLTYP = String.valueOf(line.get("UBLTYP"))
-        OutSPUN = String.valueOf(line.get("UBSPUN"))
-        OutCUNO = Customer
-        OutCUCD = CurrencyCode 
-        OutTEPY = PaymentTerms
-        OutORST = OrderStatus
-        OutDLIX = DeliveryNumber
-        OutSAPR = SalesPrice
-        OutNEPR = NetPrice
-        OutLNAM = LineAmount
-        OutTEDL = DeliveryTerms
-        OutIVDT = InvoiceDate
-        OutYEA4 = Year
+  if (orderStatus >= "70") {
+        outCONO = String.valueOf(line.get("UBCONO"))
+        outDLIX = String.valueOf(line.get("UBDLIX"))
+        outIVNO = String.valueOf(line.get("UBIVNO")) 
+        outITNO = String.valueOf(line.get("UBITNO"))  
+        outLTYP = String.valueOf(line.get("UBLTYP"))
+        outSPUN = String.valueOf(line.get("UBSPUN"))
+        outCUNO = customer
+        outCUCD = currencyCode 
+        outTEPY = paymentTerms
+        outORST = orderStatus
+        outDLIX = deliveryNumber
+        outSAPR = salesPrice
+        outNEPR = netPrice
+        outLNAM = lineAmount
+        outTEDL = deliveryTerms
+        outIVDT = invoiceDate
+        outYEA4 = year
         
         // Get Order Head Info 
-        Optional<DBContainer> OOHEAD = findOOHEAD(Company, OrderNumber)
+        Optional<DBContainer> OOHEAD = findOOHEAD(company, orderNumber)
         if(OOHEAD.isPresent()){
           // Record found, continue to get information  
           DBContainer containerOOHEAD = OOHEAD.get() 
-          OutORDT = String.valueOf(containerOOHEAD.get("OAORDT"))  
-          OutFACI = containerOOHEAD.getString("OAFACI")  
-          OutORTP = containerOOHEAD.getString("OAORTP")   
-          OutWCON = containerOOHEAD.getString("OAWCON")   
-          OutORNO = containerOOHEAD.getString("OAORNO")   
-          LanguageCode = containerOOHEAD.getString("OALNCD")   
+          outORDT = String.valueOf(containerOOHEAD.get("OAORDT"))  
+          outFACI = containerOOHEAD.getString("OAFACI")  
+          outORTP = containerOOHEAD.getString("OAORTP")   
+          outWCON = containerOOHEAD.getString("OAWCON")   
+          outORNO = containerOOHEAD.getString("OAORNO")   
+          languageCode = containerOOHEAD.getString("OALNCD")   
         } else {
-          OutORDT = ""
-          OutFACI = ""
-          OutORTP = ""
-          OutWCON = ""
-          OutORNO = ""
-          LanguageCode = ""
+          outORDT = ""
+          outFACI = ""
+          outORTP = ""
+          outWCON = ""
+          outORNO = ""
+          languageCode = ""
         } 
 
         // TEDL text
-        Optional<DBContainer> CSYTAB = findCSYTAB(Company, DeliveryTerms, LanguageCode)
+        Optional<DBContainer> CSYTAB = findCSYTAB(company, deliveryTerms, languageCode)
         if(CSYTAB.isPresent()){
           // Record found, continue to get information  
           DBContainer containerCSYTAB = CSYTAB.get() 
-          OutTEL1 = containerCSYTAB.getString("CTPARM")  
+          outTEL1 = containerCSYTAB.getString("CTPARM")  
         } else {
-          OutTEL1 = ""
+          outTEL1 = ""
         } 
 
         // Get Order Line Info 
-        Optional<DBContainer> OOLINE = findOOLINE(Company, OrderNumber, OrderLine, OrderLineSuffix)
+        Optional<DBContainer> OOLINE = findOOLINE(company, orderNumber, orderLine, orderLineSuffix)
         if(OOLINE.isPresent()){
           // Record found, continue to get information  
           DBContainer containerOOLINE = OOLINE.get() 
-          OutADID = containerOOLINE.getString("OBADID")  
-          OutRSCD = containerOOLINE.getString("OBRSCD")   
-          OutSMCD = containerOOLINE.getString("OBSMCD")   
-          OutOFNO = containerOOLINE.getString("OBOFNO")   
-          OutAGNO = containerOOLINE.getString("OBAGNO") 
-          AttributeNumber = containerOOLINE.get("OBATNR") 
+          outADID = containerOOLINE.getString("OBADID")  
+          outRSCD = containerOOLINE.getString("OBRSCD")   
+          outSMCD = containerOOLINE.getString("OBSMCD")   
+          outOFNO = containerOOLINE.getString("OBOFNO")   
+          outAGNO = containerOOLINE.getString("OBAGNO") 
+          attributeNumber = containerOOLINE.get("OBATNR") 
         } else {
-          OutADID = ""
-          OutRSCD = ""
-          OutSMCD = ""
-          OutOFNO = ""
-          OutAGNO = ""
-          AttributeNumber = 0
+          outADID = ""
+          outRSCD = ""
+          outSMCD = ""
+          outOFNO = ""
+          outAGNO = ""
+          attributeNumber = 0
         }
 
      
         // Get Item information 
-        Optional<DBContainer> MITMAS = findMITMAS(Company, ItemNumber)
+        Optional<DBContainer> MITMAS = findMITMAS(company, itemNumber)
         if(MITMAS.isPresent()){
           // Record found, continue to get information  
           DBContainer containerMITMAS = MITMAS.get() 
-          OutITDS = containerMITMAS.getString("MMITDS")   
-          OutHIE1 = containerMITMAS.getString("MMHIE1")   
-          OutHIE2 = containerMITMAS.getString("MMHIE2")   
-          OutHIE3 = containerMITMAS.getString("MMHIE3")  
-          OutHIE4 = containerMITMAS.getString("MMHIE4")  
-          OutHIE5 = containerMITMAS.getString("MMHIE5")  
+          outITDS = containerMITMAS.getString("MMITDS")   
+          outHIE1 = containerMITMAS.getString("MMHIE1")   
+          outHIE2 = containerMITMAS.getString("MMHIE2")   
+          outHIE3 = containerMITMAS.getString("MMHIE3")  
+          outHIE4 = containerMITMAS.getString("MMHIE4")  
+          outHIE5 = containerMITMAS.getString("MMHIE5")  
         } else {
-          OutITDS = ""
-          OutHIE1 = ""
-          OutHIE2 = ""
-          OutHIE3 = ""
-          OutHIE4 = ""
-          OutHIE5 = ""
+          outITDS = ""
+          outHIE1 = ""
+          outHIE2 = ""
+          outHIE3 = ""
+          outHIE4 = ""
+          outHIE5 = ""
         }
         
         // Get Attribute information 
-        Optional<DBContainer> MOATTR = findMOATTR(Company, AttributeNumber, "FOCUS", "0")
+        Optional<DBContainer> MOATTR = findMOATTR(company, attributeNumber, "FOCUS", "0")
         if(MOATTR.isPresent()){
           // Record found, continue to get information  
           DBContainer containerMOATTR = MOATTR.get() 
-          OutATAV = containerMOATTR.getString("AHATAV")   
+          outATAV = containerMOATTR.getString("AHATAV")   
         } else {
-          OutATAV = ""
+          outATAV = ""
         }
 
-        getDeliveryAddress(CompanyString, DeliveryNumberString, "01")
+        getDeliveryAddress(companyString, deliveryNumberString, "01")
         
-        getAdditionalDelLineInfo(CompanyString, OrderNumber, DeliveryNumberString, Warehouse, OrderLineString, OrderLineSuffixString, PaymentTerms)
+        getAdditionalDelLineInfo(companyString, orderNumber, deliveryNumberString, warehouse, orderLineString, orderLineSuffixString, paymentTerms)
         
-        getDivisionInfo(CompanyString, Division)
+        getDivisionInfo(companyString, division)
         
       // Send Output
-      SetOutPut()
+      setOutput()
       
       // Get Delivery Head Info 
-      Optional<DBContainer> EXTPFXrecord = findEXTPFX(Company, OrderNumber, OrderLine, OrderLineSuffix, DeliveryNumber, Warehouse, PaymentTerms)
+      Optional<DBContainer> EXTPFXrecord = findEXTPFX(company, orderNumber, orderLine, orderLineSuffix, deliveryNumber, warehouse, paymentTerms)
       if(EXTPFXrecord.isPresent()){
-        UpdEXTPFX()
+        updEXTPFX()
       } else {
-        AddEXTPFX()
+        addEXTPFX()
       }
       
       mi.write() 

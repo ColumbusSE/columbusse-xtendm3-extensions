@@ -23,33 +23,31 @@ public class LstVendor extends ExtendM3Transaction {
   private final LoggerAPI logger;  
   
   // Definition 
-  public int Company  
-  public String Supplier 
-  public int AddressType 
-  public String AddressID 
-  public String InSTAT
-  public int InADTE
-  public String InADID
-  public int InCONO  
-  public String Address1
-  public String Postal
-  public String Town
+  public int company  
+  public String supplier 
+  public String inSTAT
+  public int inADTE
+  public String inADID
+  public int inCONO  
+  public String address1
+  public String postal
+  public String town
     
   // Definition of output fields
-  public String OutSUNO  
-  public String OutSUNM  
-  public String OutSTAT  
-  public String OutPHNO
-  public String OutTFNO  
-  public String OutCSCD 
-  public String OutECAR  
-  public String OutVRNO 
-  public String OutCUCD
-  public String OutTEPY
-  public String OutADR1   
-  public String OutTOWN  
-  public String OutPONO 
-  public String OutEMAL
+  public String outSUNO  
+  public String outSUNM  
+  public String outSTAT  
+  public String outPHNO
+  public String outTFNO  
+  public String outCSCD 
+  public String outECAR  
+  public String outVRNO 
+  public String outCUCD
+  public String outTEPY
+  public String outADR1   
+  public String outTOWN  
+  public String outPONO 
+  public String outEMAL
 
   
   // Constructor 
@@ -60,7 +58,21 @@ public class LstVendor extends ExtendM3Transaction {
      this.logger = logger; 
   } 
      
-     
+  //******************************************************************** 
+  // Main 
+  //********************************************************************  
+  public void main() { 
+      // Get LDA company of not entered 
+      int inCONO = getCONO()  
+      
+      inSTAT = mi.in.get("STAT")  
+      inADTE = mi.in.get("ADTE")  
+      inADID = mi.in.get("ADID") 
+
+      // Start the listing in CIDMAS
+      lstVendorRecord()  
+  }
+   
                 
   //******************************************************************** 
   // Get Company from LDA
@@ -113,9 +125,9 @@ public class LstVendor extends ExtendM3Transaction {
   Closure<?> addressProcessor = { DBContainer CIDADR ->   
   
     String Suppl = CIDADR.getString("SASUNO")
-    Address1 = CIDADR.getString("SAADR1")
-    Town = CIDADR.getString("SATOWN")
-    Postal = CIDADR.getString("SAPONO")
+    address1 = CIDADR.getString("SAADR1")
+    town = CIDADR.getString("SATOWN")
+    postal = CIDADR.getString("SAPONO")
 
   }
 
@@ -136,23 +148,7 @@ public class LstVendor extends ExtendM3Transaction {
     return Optional.empty()
   }
   
-  
-  //******************************************************************** 
-  // Main 
-  //********************************************************************  
-  public void main() { 
-      // Get LDA company of not entered 
-      int InCONO = getCONO()  
-      
-      InSTAT = mi.in.get("STAT")  
-      InADTE = mi.in.get("ADTE")  
-      InADID = mi.in.get("ADID") 
-
-      // Start the listing in CIDMAS
-      LstVendorRecord()
    
-  }
- 
   //******************************************************************** 
   // Check if null or empty
   //********************************************************************  
@@ -174,42 +170,43 @@ public class LstVendor extends ExtendM3Transaction {
   //******************************************************************** 
   // Set Output data
   //******************************************************************** 
-  void SetOutPut() {
+  void setOutput() {
      
-    mi.outData.put("SUNO", OutSUNO)
-    mi.outData.put("SUNM", OutSUNM)
-    mi.outData.put("STAT", OutSTAT)
-    mi.outData.put("PHNO", OutPHNO)  
-    mi.outData.put("TFNO", OutTFNO)  
-    mi.outData.put("CSCD", OutCSCD)  
-    mi.outData.put("ECAR", OutECAR)
-    mi.outData.put("VRNO", OutVRNO)  
-    mi.outData.put("CUCD", OutCUCD)
-    mi.outData.put("TEPY", OutTEPY)
-    mi.outData.put("ADR1", OutADR1)    
-    mi.outData.put("TOWN", OutTOWN)  
-    mi.outData.put("PONO", OutPONO) 
-    mi.outData.put("EMAL", OutEMAL) 
+    mi.outData.put("SUNO", outSUNO)
+    mi.outData.put("SUNM", outSUNM)
+    mi.outData.put("STAT", outSTAT)
+    mi.outData.put("PHNO", outPHNO)  
+    mi.outData.put("TFNO", outTFNO)  
+    mi.outData.put("CSCD", outCSCD)  
+    mi.outData.put("ECAR", outECAR)
+    mi.outData.put("VRNO", outVRNO)  
+    mi.outData.put("CUCD", outCUCD)
+    mi.outData.put("TEPY", outTEPY)
+    mi.outData.put("ADR1", outADR1)    
+    mi.outData.put("TOWN", outTOWN)  
+    mi.outData.put("PONO", outPONO) 
+    mi.outData.put("EMAL", outEMAL) 
 
   } 
     
   //******************************************************************** 
   // List all information
   //********************************************************************  
-   void LstVendorRecord(){   
+   void lstVendorRecord(){   
      
-     // List all Purchase Order lines
+     // List all Vendor lines
      ExpressionFactory expression = database.getExpressionFactory("CIDMAS")
    
-     expression = expression.eq("IDSTAT", String.valueOf(InSTAT))
+     expression = expression.eq("IDSTAT", String.valueOf(inSTAT))
 
      // List Purchase order line   
-     DBAction actionline = database.table("CIDMAS").index("00").matching(expression).selectAllFields().build()   
+     //DBAction actionline = database.table("CIDMAS").index("00").matching(expression).selectAllFields().build()     //D 20220108
+	 DBAction actionline = database.table("CIDMAS").index("00").matching(expression).selection("IDCONO", "IDSUNO", "IDSUNM", "IDSTAT", "IDPHNO", "IDTFNO", "IDCSCD", "IDECAR", "IDVRNO").build()   //A 20220108 
      DBContainer line = actionline.getContainer()  
      
      // Read with one key  
      line.set("IDCONO", CONO)  
-     actionline.readAll(line, 1, releasedLineProcessor)   
+     actionline.readAll(line, 1, mi.getMaxRecords(), releasedLineProcessor)   
    
    } 
     
@@ -219,59 +216,59 @@ public class LstVendor extends ExtendM3Transaction {
   Closure<?> releasedLineProcessor = { DBContainer line ->   
   
   // Fields from CIDMAS to use in the other read
-  Company = line.get("IDCONO")
-  Supplier = line.get("IDSUNO") 
+  company = line.get("IDCONO")
+  supplier = line.get("IDSUNO") 
 
   // Output selectAllFields 
-  OutSUNO = String.valueOf(line.get("IDSUNO")) 
-  OutSUNM = String.valueOf(line.get("IDSUNM"))  
-  OutSTAT = String.valueOf(line.get("IDSTAT"))  
-  OutPHNO = String.valueOf(line.get("IDPHNO"))
-  OutTFNO = String.valueOf(line.get("IDTFNO"))
-  OutCSCD = String.valueOf(line.get("IDCSCD"))
-  OutECAR = String.valueOf(line.get("IDECAR"))
-  OutVRNO = String.valueOf(line.get("IDVRNO"))
+  outSUNO = String.valueOf(line.get("IDSUNO")) 
+  outSUNM = String.valueOf(line.get("IDSUNM"))  
+  outSTAT = String.valueOf(line.get("IDSTAT"))  
+  outPHNO = String.valueOf(line.get("IDPHNO"))
+  outTFNO = String.valueOf(line.get("IDTFNO"))
+  outCSCD = String.valueOf(line.get("IDCSCD"))
+  outECAR = String.valueOf(line.get("IDECAR"))
+  outVRNO = String.valueOf(line.get("IDVRNO"))
 
     
   // Get Supplier information 
-  Optional<DBContainer> CIDVEN = findCIDVEN(Company, Supplier)
+  Optional<DBContainer> CIDVEN = findCIDVEN(company, supplier)
   if(CIDVEN.isPresent()){
     // Record found, continue to get information  
     DBContainer containerCIDVEN = CIDVEN.get() 
-    OutCUCD = containerCIDVEN.getString("IICUCD")   
-    OutTEPY = containerCIDVEN.getString("IITEPY")   
+    outCUCD = containerCIDVEN.getString("IICUCD")   
+    outTEPY = containerCIDVEN.getString("IITEPY")   
   } else {
-    OutCUCD = ""
-    OutTEPY = ""
+    outCUCD = ""
+    outTEPY = ""
   } 
      
   // Get Supplier Address information 
-  Optional<DBContainer> CIDADR = findCIDADR(Company, Supplier, InADTE, InADID)
+  Optional<DBContainer> CIDADR = findCIDADR(company, supplier, inADTE, inADID)
   if(CIDADR.isPresent()){
     // Record found, continue to get information  
     DBContainer containerCIDADR = CIDADR.get() 
-    OutADR1 = Address1
-    OutTOWN = Town  
-    OutPONO = Postal 
+    outADR1 = address1
+    outTOWN = town  
+    outPONO = postal 
  
   } else {
-    OutADR1 = ""
-    OutTOWN = ""
-    OutPONO = ""
+    outADR1 = ""
+    outTOWN = ""
+    outPONO = ""
   } 
   
   //Get Email Address
-  Optional<DBContainer> CEMAIL = findCEMAIL(Company, Supplier)
+  Optional<DBContainer> CEMAIL = findCEMAIL(company, supplier)
   if(CEMAIL.isPresent()){
     // Record found, continue to get information  
     DBContainer containerCEMAIL = CEMAIL.get()    
-    OutEMAL = containerCEMAIL.getString("CBEMAL")
+    outEMAL = containerCEMAIL.getString("CBEMAL")
   } else {
-    OutEMAL = ""
+    outEMAL = ""
   }
 
   // Send Output
-  SetOutPut()
+  setOutput()
   mi.write() 
 } 
 }

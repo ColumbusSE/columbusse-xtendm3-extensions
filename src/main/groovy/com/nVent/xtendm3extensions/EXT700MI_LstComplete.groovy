@@ -19,97 +19,97 @@ public class LstComplete extends ExtendM3Transaction {
   private final LoggerAPI logger;  
   
   // Definition 
-  public int Company  
-  public String Division
-  public String PurchaseOrder 
-  public int PurchaseLine 
-  public int PurchaseSuffix 
-  public String Supplier
-  public String Buyer 
-  public int RecNumber 
-  public String ItemNumber
-  public double OrderQtyBaseUnit 
-  public double InvQtyBaseUnit 
-  public double RecQtyBaseUnit 
+  public int company  
+  public String division
+  public String purchaseOrder 
+  public int purchaseLine 
+  public int purchaseSuffix 
+  public String supplier
+  public String buyer 
+  public int recNumber 
+  public String itemNumber
+  public double orderQtyBaseUnit 
+  public double invQtyBaseUnit 
+  public double recQtyBaseUnit 
   public double ORQA 
   public double IVQA 
   public double RVQA   
   public double IVNA 
   public String PUUN 
-  public double Discount1 
-  public double Discount2  
-  public double Discount3 
-  public double ConfirmedDiscount1 
-  public double ConfirmedDiscount2 
-  public double ConfirmedDiscount3 
-  public double ConfirmedPrice  
-  public double LineAmount  
-  public double LineQty  
-  public double ResultDiscount 
-  public double ResultConfirmedDiscount 
+  public double discount1 
+  public double discount2  
+  public double discount3 
+  public double confirmedDiscount1 
+  public double confirmedDiscount2 
+  public double confirmedDiscount3 
+  public double confirmedPrice  
+  public double lineAmount  
+  public double lineQty  
+  public double resultDiscount 
+  public double resultConfirmedDiscount 
   public double RCAC  
   public double SERA  
   public double IVQT  
-  public double AccRecCostAmount 
-  public double AccRecExcRate  
-  public double AccRecQty  
-  public double AccResult 
+  public double accRecCostAmount 
+  public double accRecExcRate  
+  public double accRecQty  
+  public double accResult 
   public double COFA  
   public int DMCF 
-  public double AccInvQty  
-  public double AccInvAmount 
-  public int RegDate
+  public double accInvQty  
+  public double accInvAmount 
+  public int regDate
   public String PO
-  public String InRegDate
-  public boolean AlreadySentOut
+  public String inRegDate
+  public boolean alreadySentOut
   public int countFGRECL  
   public String CC_CountryCode
   public String ID_CountryCode
-  public double RecCostAmount 
-  public double RecExcRate 
-  public double Result 
-  public double CalcCOFA1   
-  public double CalcDMCF1   
-  public double CalcCOFA2   
-  public double CalcDMCF2   
-  public double ResultFACT1   
-  public double ResultFACT2   
-  public double ResultFACTTotal   
+  public double recCostAmount 
+  public double recExcRate 
+  public double result 
+  public double calcCOFA1   
+  public double calcDMCF1   
+  public double calcCOFA2   
+  public double calcDMCF2   
+  public double resultFACT1   
+  public double resultFACT2   
+  public double resultFACTTotal   
   public String PPUN       
     
   // Definition of output fields
-  public String OutLPUD
-  public String OutPNLI  
-  public String OutPNLS  
-  public String OutITNO  
-  public String OutLNAM
-  public String OutPITD  
-  public String OutORQT 
-  public String OutRVQT  
-  public String OutCONO 
-  public String OutDIVI
-  public String OutPUNO
-  public String OutSUNO   
-  public String OutNTAM  
-  public String OutPUDT 
-  public String OutEMAL
-  public String OutORIG
-  public String OutUNPR
-  public String OutDEAH
-  public String OutGRAM
-  public String OutDEAL 
-  public String OutSUDO 
-  public String OutRPQT
-  public String OutTRDT  
-  public String OutREPN 
-  public String OutIVQT
-  public String OutCOMP
-  public String OutGRIQ
-  public String OutGRIA
-  public String OutTIVA
-  public String OutIVNA
-  public String OutFACT  
-  public String OutVTCD
+  public String outLPUD
+  public String outPNLI  
+  public String outPNLS  
+  public String outITNO  
+  public String outLNAM
+  public String outPITD  
+  public String outORQT 
+  public String outRVQT  
+  public String outCONO 
+  public String outDIVI
+  public String outPUNO
+  public String outSUNO   
+  public String outNTAM  
+  public String outPUDT 
+  public String outEMAL
+  public String outORIG
+  public String outUNPR
+  public String outDEAH
+  public String outGRAM
+  public String outDEAL 
+  public String outSUDO 
+  public String outRPQT
+  public String outTRDT  
+  public String outREPN 
+  public String outIVQT
+  public String outCOMP
+  public String outGRIQ
+  public String outGRIA
+  public String outTIVA
+  public String outIVNA
+  public String outFACT  
+  public String outVTCD
   
   
   // Constructor 
@@ -119,7 +119,29 @@ public class LstComplete extends ExtendM3Transaction {
      this.program = program;
      this.logger = logger; 
   } 
-     
+ 
+
+  //******************************************************************** 
+  // Main 
+  //********************************************************************  
+  public void main() { 
+      // Get LDA company of not entered 
+      int CONO = getCONO()  
+      
+      // If Registration date and/or Purchae order are filled it will be used 
+      inRegDate = mi.in.get("RGDT")  
+      if(isNullOrEmpty(inRegDate)){ 
+        regDate = 0
+      }else{
+        regDate = mi.in.get("RGDT")
+      } 
+      
+      PO = mi.in.get("PUNO")  
+      
+      // Start the listing in MPLINE
+      lstRecord()
+   
+  } 
      
                 
   //******************************************************************** 
@@ -169,7 +191,7 @@ public class LstComplete extends ExtendM3Transaction {
   //******************************************************************** 
   // Accumulate value from FGINLI
   //******************************************************************** 
-  private List<DBContainer> ListFGINLI(Integer CONO, String PUNO, Integer PNLI, Integer PNLS, Integer REPN){ 
+  private List<DBContainer> listFGINLI(Integer CONO, String PUNO, Integer PNLI, Integer PNLS, Integer REPN){ 
     List<DBContainer>InvLine = new ArrayList() 
     DBAction query = database.table("FGINLI").index("20").selection("F5IVNA", "F5IVQT").build() 
     DBContainer FGINLI = query.getContainer() 
@@ -198,7 +220,7 @@ public class LstComplete extends ExtendM3Transaction {
   //******************************************************************** 
   // Accumulate value from FGRECL 
   //********************************************************************  
-  private List<DBContainer> ListFGRECL(int CONO, String DIVI, String PUNO, int PNLI, int PNLS){
+  private List<DBContainer> listFGRECL(int CONO, String DIVI, String PUNO, int PNLI, int PNLS){
     List<DBContainer>RecLine = new ArrayList() 
     ExpressionFactory expression = database.getExpressionFactory("FGRECL")
     expression = expression.eq("F2RELP", "1") 
@@ -271,27 +293,6 @@ public class LstComplete extends ExtendM3Transaction {
     return Optional.empty()
   }   
   
-  //******************************************************************** 
-  // Main 
-  //********************************************************************  
-  public void main() { 
-      // Get LDA company of not entered 
-      int CONO = getCONO()  
-      
-      // If Registration date and/or Purchae order are filled it will be used 
-      InRegDate = mi.in.get("RGDT")  
-      if(isNullOrEmpty(InRegDate)){ 
-        RegDate = 0
-      }else{
-        RegDate = mi.in.get("RGDT")
-      } 
-      
-      PO = mi.in.get("PUNO")  
-      
-      // Start the listing in MPLINE
-      LstRecord()
-   
-  }
  
   //******************************************************************** 
   // Check if null or empty
@@ -306,70 +307,87 @@ public class LstComplete extends ExtendM3Transaction {
   //******************************************************************** 
   // Set Output data
   //******************************************************************** 
-  void SetOutPut() {
+  void setOutput() {
      
-    mi.outData.put("CONO", OutCONO) 
-    mi.outData.put("DIVI", OutDIVI)
-    mi.outData.put("PUNO", OutPUNO)
-    mi.outData.put("SUNO", OutSUNO)
-    mi.outData.put("LPUD", OutLPUD)
-    mi.outData.put("PNLI", OutPNLI)  
-    mi.outData.put("PNLS", OutPNLS)  
-    mi.outData.put("ITNO", OutITNO)  
-    mi.outData.put("LNAM", OutLNAM)
-    mi.outData.put("PITD", OutPITD)  
-    mi.outData.put("ORQT", OutORQT)
-    mi.outData.put("IVQT", OutIVQT)
-    mi.outData.put("RVQT", OutRVQT)    
-    mi.outData.put("NTAM", OutNTAM)  
-    mi.outData.put("PUDT", OutPUDT) 
-    mi.outData.put("EMAL", OutEMAL) 
-    mi.outData.put("ORIG", OutORIG)
-    mi.outData.put("UNPR", OutUNPR)
-    mi.outData.put("DEAH", OutDEAH)
-    mi.outData.put("GRAM", OutGRAM)
-    mi.outData.put("DEAL", OutDEAL) 
-    mi.outData.put("SUDO", OutSUDO) 
-    mi.outData.put("RPQT", OutRPQT) 
-    mi.outData.put("TRDT", OutTRDT)  
-    mi.outData.put("REPN", OutREPN) 
-    mi.outData.put("GRIQ", OutGRIQ)
-    mi.outData.put("COMP", OutCOMP)
-    mi.outData.put("GRIQ", OutGRIQ)
-    mi.outData.put("GRIA", OutGRIA)
-    mi.outData.put("TIVA", OutTIVA)
-    mi.outData.put("IVNA", OutIVNA) 
-    mi.outData.put("FACT", OutFACT) 
-    mi.outData.put("VTCD", OutVTCD)    
+    mi.outData.put("CONO", outCONO) 
+    mi.outData.put("DIVI", outDIVI)
+    mi.outData.put("PUNO", outPUNO)
+    mi.outData.put("SUNO", outSUNO)
+    mi.outData.put("LPUD", outLPUD)
+    mi.outData.put("PNLI", outPNLI)  
+    mi.outData.put("PNLS", outPNLS)  
+    mi.outData.put("ITNO", outITNO)  
+    mi.outData.put("LNAM", outLNAM)
+    mi.outData.put("PITD", outPITD)  
+    mi.outData.put("ORQT", outORQT)
+    mi.outData.put("IVQT", outIVQT)
+    mi.outData.put("RVQT", outRVQT)    
+    mi.outData.put("NTAM", outNTAM)  
+    mi.outData.put("PUDT", outPUDT) 
+    mi.outData.put("EMAL", outEMAL) 
+    mi.outData.put("ORIG", outORIG)
+    mi.outData.put("UNPR", outUNPR)
+    mi.outData.put("DEAH", outDEAH)
+    mi.outData.put("GRAM", outGRAM)
+    mi.outData.put("DEAL", outDEAL) 
+    mi.outData.put("SUDO", outSUDO) 
+    mi.outData.put("RPQT", outRPQT) 
+    mi.outData.put("TRDT", outTRDT)  
+    mi.outData.put("REPN", outREPN) 
+    mi.outData.put("GRIQ", outGRIQ)
+    mi.outData.put("COMP", outCOMP)
+    mi.outData.put("GRIQ", outGRIQ)
+    mi.outData.put("GRIA", outGRIA)
+    mi.outData.put("TIVA", outTIVA)
+    mi.outData.put("IVNA", outIVNA) 
+    mi.outData.put("FACT", outFACT) 
+    mi.outData.put("VTCD", outVTCD)    
     
   } 
     
   //******************************************************************** 
   // List all information
   //********************************************************************  
-   void LstRecord(){   
+   void lstRecord(){   
      
      // List all Purchase Order lines
      ExpressionFactory expression = database.getExpressionFactory("MPLINE")
    
      // Depending on input value (Registrationdate and Purchase order)
-     if(RegDate != 0 && !isNullOrEmpty(PO)){
-       expression = expression.gt("IBPUST", "69").and(expression.lt("IBPUST", "81")).and(expression.eq("IBRGDT", String.valueOf(RegDate))).and(expression.eq("IBPUNO",  String.valueOf(PO)))     
-     }else if(RegDate != 0 && isNullOrEmpty(PO)){
-       expression = expression.gt("IBPUST", "69").and(expression.lt("IBPUST", "81")).and(expression.eq("IBRGDT", String.valueOf(RegDate))) 
-     }else if(RegDate == 0 && !isNullOrEmpty(PO)){
+     /*if(regDate != 0 && !isNullOrEmpty(PO)){
+       expression = expression.gt("IBPUST", "69").and(expression.lt("IBPUST", "81")).and(expression.eq("IBRGDT", String.valueOf(regDate))).and(expression.eq("IBPUNO",  String.valueOf(PO)))     
+     }else if(regDate != 0 && isNullOrEmpty(PO)){
+       expression = expression.gt("IBPUST", "69").and(expression.lt("IBPUST", "81")).and(expression.eq("IBRGDT", String.valueOf(regDate))) 
+     }else if(regDate == 0 && !isNullOrEmpty(PO)){
        expression = expression.gt("IBPUST", "69").and(expression.lt("IBPUST", "81")).and(expression.eq("IBPUNO",  String.valueOf(PO)))
      }else{
        expression = expression.le("IBPUST", "80")   
+     }*/
+	 
+	   // Depending on input value (Registrationdate and Purchase order)
+     if (regDate != 0) {
+        expression = expression.gt("IBPUST", "69").and(expression.lt("IBPUST", "81")).and(expression.eq("IBRGDT", String.valueOf(regDate))) 
+     } else if (regDate == 0) {
+        expression = expression.gt("IBPUST", "69").and(expression.lt("IBPUST", "81"))
+     } else {
+        expression = expression.le("IBPUST", "80")   
      }
      
-     // List Purchase order line   
-     DBAction actionline = database.table("MPLINE").index("00").matching(expression).selection("IBCONO", "IBPUNO", "IBPNLI", "IBPNLS", "IBITNO", "IBLPUD", "IBLNAM", "IBPITD", "IBORQA", "IBIVQA", "IBRVQA", "IBPUUN", "IBPPUN", "IBPUST", "IBRGDT", "IBODI1", "IBODI2", "IBODI3", "IBCPPR", "IBCFD1", "IBCFD2", "IBCFD3", "IBVTCD").build()   //A 20210604 
-     DBContainer line = actionline.getContainer()   
+     // List Purchase order line  	 
+     //DBAction actionline = database.table("MPLINE").index("00").matching(expression).selection("IBCONO", "IBPUNO", "IBPNLI", "IBPNLS", "IBITNO", "IBLPUD", "IBLNAM", "IBPITD", "IBORQA", "IBIVQA", "IBRVQA", "IBPUUN", "IBPPUN", "IBPUST", "IBRGDT", "IBODI1", "IBODI2", "IBODI3", "IBCPPR", "IBCFD1", "IBCFD2", "IBCFD3", "IBVTCD").build()   //A 20210604 
+     DBAction actionline = database.table("MPLINE").index("06").matching(expression).selection("IBCONO", "IBPUNO", "IBPNLI", "IBPNLS", "IBITNO", "IBLPUD", "IBLNAM", "IBPITD", "IBORQA", "IBIVQA", "IBRVQA", "IBPUUN", "IBPPUN", "IBPUST", "IBRGDT", "IBODI1", "IBODI2", "IBODI3", "IBCPPR", "IBCFD1", "IBCFD2", "IBCFD3", "IBVTCD").build()   //A 20210604 
+	   DBContainer line = actionline.getContainer()   
      
      // Read with one key  
-     line.set("IBCONO", CONO)  
-     actionline.readAll(line, 1, releasedLineProcessor)   
+     line.set("IBCONO", CONO) 
+	   line.set("IBPUNO", PO)                                        //A 20220108
+     
+     if(!isNullOrEmpty(PO)){                                                       //A 20220108
+       actionline.readAll(line, 2, mi.getMaxRecords(), releasedLineProcessor)      //A 20220108
+     } else {                                                                      //A 20220108
+	     actionline.readAll(line, 1, mi.getMaxRecords(), releasedLineProcessor)      //A 20220108
+     }                                                                             //A 20220108
+     //actionline.readAll(line, 1, releasedLineProcessor)                          //D 20220108
    
    } 
     
@@ -379,20 +397,20 @@ public class LstComplete extends ExtendM3Transaction {
   Closure<?> releasedLineProcessor = { DBContainer line ->   
   
   // Fields from MPLINE to use in the other read
-  Company = line.get("IBCONO")
-  ItemNumber = line.get("IBITNO") 
-  PurchaseOrder = line.get("IBPUNO") 
-  PurchaseLine = line.get("IBPNLI") 
-  PurchaseSuffix = line.get("IBPNLS")  
+  company = line.get("IBCONO")
+  itemNumber = line.get("IBITNO") 
+  purchaseOrder = line.get("IBPUNO") 
+  purchaseLine = line.get("IBPNLI") 
+  purchaseSuffix = line.get("IBPNLS")  
     
   // Output selectAllFields 
-  OutLPUD = String.valueOf(line.get("IBLPUD"))
-  OutPNLI = String.valueOf(line.get("IBPNLI")) 
-  OutPNLS = String.valueOf(line.get("IBPNLS"))  
-  OutITNO = String.valueOf(line.get("IBITNO"))  
-  OutLNAM = String.valueOf(line.get("IBLNAM"))
-  OutPITD = String.valueOf(line.get("IBPITD"))
-  OutVTCD = String.valueOf(line.get("IBVTCD"))
+  outLPUD = String.valueOf(line.get("IBLPUD"))
+  outPNLI = String.valueOf(line.get("IBPNLI")) 
+  outPNLS = String.valueOf(line.get("IBPNLS"))  
+  outITNO = String.valueOf(line.get("IBITNO"))  
+  outLNAM = String.valueOf(line.get("IBLNAM"))
+  outPITD = String.valueOf(line.get("IBPITD"))
+  outVTCD = String.valueOf(line.get("IBVTCD"))
 
   // Fields for calculation
   ORQA = line.get("IBORQA")
@@ -402,319 +420,315 @@ public class LstComplete extends ExtendM3Transaction {
   PPUN = line.get("IBPPUN")    
     
   // Calculate with alternativ unit 
-  Optional<DBContainer> MITAUN = findMITAUN(Company, ItemNumber, 1, PUUN)
+  Optional<DBContainer> MITAUN = findMITAUN(company, itemNumber, 1, PUUN)
   if(MITAUN.isPresent()){
     // Record found, continue to get information  
     DBContainer containerMITAUN = MITAUN.get() 
     COFA = containerMITAUN.get("MUCOFA")
     DMCF = containerMITAUN.get("MUDMCF") 
     if(DMCF == 1){
-      OrderQtyBaseUnit = ORQA * COFA
-      InvQtyBaseUnit = IVQA * COFA
-      RecQtyBaseUnit = RVQA * COFA
+      orderQtyBaseUnit = ORQA * COFA
+      invQtyBaseUnit = IVQA * COFA
+      recQtyBaseUnit = RVQA * COFA
     }else {
       if(COFA != 0){ 
-       OrderQtyBaseUnit = ORQA / COFA
-       InvQtyBaseUnit = IVQA / COFA
-       RecQtyBaseUnit = RVQA / COFA
+       orderQtyBaseUnit = ORQA / COFA
+       invQtyBaseUnit = IVQA / COFA
+       recQtyBaseUnit = RVQA / COFA
       } 
     } 
-    OutORQT = String.valueOf(OrderQtyBaseUnit)
-    OutIVQT = String.valueOf(InvQtyBaseUnit)
-    OutRVQT = String.valueOf(RecQtyBaseUnit) 
+    outORQT = String.valueOf(orderQtyBaseUnit)
+    outIVQT = String.valueOf(invQtyBaseUnit)
+    outRVQT = String.valueOf(recQtyBaseUnit) 
   } else { 
-    OutORQT = String.valueOf(ORQA)
-    OutIVQT = String.valueOf(IVQA)
-    OutRVQT = String.valueOf(RVQA)
+    outORQT = String.valueOf(ORQA)
+    outIVQT = String.valueOf(IVQA)
+    outRVQT = String.valueOf(RVQA)
   }
   
   // Calculate with Unit of measure factor   
   // Get COFA and DMCF from PPUN             
-  Optional<DBContainer> MITAUN1 = findMITAUN(Company, ItemNumber, 2, PPUN)
+  Optional<DBContainer> MITAUN1 = findMITAUN(company, itemNumber, 2, PPUN)
   if(MITAUN1.isPresent()){
     // Record found, continue to get information  
     DBContainer containerMITAUN1 = MITAUN1.get() 
-    CalcCOFA1 = containerMITAUN1.get("MUCOFA")
-    CalcDMCF1 = containerMITAUN1.get("MUDMCF") 
+    calcCOFA1 = containerMITAUN1.get("MUCOFA")
+    calcDMCF1 = containerMITAUN1.get("MUDMCF") 
   } else { 
-    CalcCOFA1 = 1
-    CalcDMCF1 = 1
+    calcCOFA1 = 1
+    calcDMCF1 = 1
   }
   
   // Get COFA and DMCF from PUUN            
-  Optional<DBContainer> MITAUN2 = findMITAUN(Company, ItemNumber, 2, PUUN)
+  Optional<DBContainer> MITAUN2 = findMITAUN(company, itemNumber, 2, PUUN)
   if(MITAUN2.isPresent()){
     // Record found, continue to get information  
     DBContainer containerMITAUN2 = MITAUN2.get() 
-    CalcCOFA2 = containerMITAUN2.get("MUCOFA")
-    CalcDMCF2 = containerMITAUN2.get("MUDMCF") 
+    calcCOFA2 = containerMITAUN2.get("MUCOFA")
+    calcDMCF2 = containerMITAUN2.get("MUDMCF") 
   } else { 
-    CalcCOFA2 = 1
-    CalcDMCF2 = 1
+    calcCOFA2 = 1
+    calcDMCF2 = 1
   }
 
   //Calculate the UoM factor               
-  ResultFACT1 = Math.pow(CalcCOFA2,((CalcDMCF2 * -2) + 3))
-  ResultFACT2 = Math.pow(CalcCOFA1,((CalcDMCF1 * 2) - 3))
-  ResultFACTTotal = ResultFACT1 * ResultFACT2
-  OutFACT = String.valueOf(ResultFACTTotal)
+  resultFACT1 = Math.pow(calcCOFA2,((calcDMCF2 * -2) + 3))
+  resultFACT2 = Math.pow(calcCOFA1,((calcDMCF1 * 2) - 3))
+  resultFACTTotal = resultFACT1 * resultFACT2
+  outFACT = String.valueOf(resultFACTTotal)
 
     
     // Get Purchase order head
-  Optional<DBContainer> MPHEAD = findMPHEAD(Company, PurchaseOrder)
+  Optional<DBContainer> MPHEAD = findMPHEAD(company, purchaseOrder)
   if(MPHEAD.isPresent()){
      // Record found, continue to get information  
     DBContainer containerMPHEAD = MPHEAD.get()  
     
-    // Output fields   
-    OutCONO = String.valueOf(containerMPHEAD.get("IACONO"))
-    OutDIVI = containerMPHEAD.getString("IADIVI")
-    OutPUNO = containerMPHEAD.getString("IAPUNO")
-    OutSUNO = containerMPHEAD.getString("IASUNO")   
-    OutNTAM = String.valueOf(containerMPHEAD.get("IANTAM"))  
-    OutPUDT = String.valueOf(containerMPHEAD.get("IAPUDT"))
+    // output fields   
+    outCONO = String.valueOf(containerMPHEAD.get("IACONO"))
+    outDIVI = containerMPHEAD.getString("IADIVI")
+    outPUNO = containerMPHEAD.getString("IAPUNO")
+    outSUNO = containerMPHEAD.getString("IASUNO")   
+    outNTAM = String.valueOf(containerMPHEAD.get("IANTAM"))  
+    outPUDT = String.valueOf(containerMPHEAD.get("IAPUDT"))
     
     // Fields from MPHEAD to use in the other read
-    Division = containerMPHEAD.getString("IADIVI")  
-    Supplier = containerMPHEAD.getString("IASUNO")  
-    Buyer = containerMPHEAD.getString("IABUYE")   
+    division = containerMPHEAD.getString("IADIVI")  
+    supplier = containerMPHEAD.getString("IASUNO")  
+    buyer = containerMPHEAD.getString("IABUYE")   
    
     // Get Email address for Buyer
-    Optional<DBContainer> CEMAIL = findCEMAIL(Company, Buyer)
+    Optional<DBContainer> CEMAIL = findCEMAIL(company, buyer)
     if(CEMAIL.isPresent()){
       // Record found, continue to get information  
       DBContainer containerCEMAIL = CEMAIL.get()    
-      OutEMAL = containerCEMAIL.getString("CBEMAL")
+      outEMAL = containerCEMAIL.getString("CBEMAL")
     } 
   
     // Get Supplier information 
-    Optional<DBContainer> CIDMAS = findCIDMAS(Company, Supplier)
+    Optional<DBContainer> CIDMAS = findCIDMAS(company, supplier)
     if(CIDMAS.isPresent()){
       // Record found, continue to get information  
       DBContainer containerCIDMAS = CIDMAS.get() 
       ID_CountryCode = containerCIDMAS.getString("IDCSCD")   
     }  
      
-    // Get Division information
-    Optional<DBContainer> CMNDIV = findCMNDIV(Company, Division)
+    // Get division information
+    Optional<DBContainer> CMNDIV = findCMNDIV(company, division)
     if(CMNDIV.isPresent()){
       // Record found, continue to get information  
       DBContainer containerCMNDIV = CMNDIV.get() 
       CC_CountryCode = containerCMNDIV.getString("CCCSCD")   
     } 
      
-    // Compare Division's country code and the Supplier's 
+    // Compare division's country code and the Supplier's 
     if(CC_CountryCode != ID_CountryCode){ 
-      OutORIG = String.valueOf("FOR")
+      outORIG = String.valueOf("FOR")
     }else{ 
-      OutORIG = String.valueOf("DOM")
+      outORIG = String.valueOf("DOM")
     } 
     
     // Calculate unitprice  
-    Discount1 = line.get("IBODI1")
-    Discount2 = line.get("IBODI2")
-    Discount3 = line.get("IBODI3") 
-    ConfirmedDiscount1 = line.get("IBCFD1")
-    ConfirmedDiscount2 = line.get("IBCFD2")
-    ConfirmedDiscount3 = line.get("IBCFD3")
-    ConfirmedPrice = line.get("IBCPPR")
-    LineAmount = line.get("IBLNAM")
-    LineQty = line.get("IBORQA") 
-    AccRecCostAmount = 0    //A 20211115
-    AccRecExcRate = 0       //A 20211115
-    AccRecQty = 0          //A 20211115
-    ResultDiscount = 0     //A 20211115
-    AccResult = 0          //A 20211115
+    discount1 = line.get("IBODI1")
+    discount2 = line.get("IBODI2")
+    discount3 = line.get("IBODI3") 
+    confirmedDiscount1 = line.get("IBCFD1")
+    confirmedDiscount2 = line.get("IBCFD2")
+    confirmedDiscount3 = line.get("IBCFD3")
+    confirmedPrice = line.get("IBCPPR")
+    lineAmount = line.get("IBLNAM")
+    lineQty = line.get("IBORQA") 
+    accRecCostAmount = 0    //A 20211115
+    accRecExcRate = 0       //A 20211115
+    accRecQty = 0          //A 20211115
+    resultDiscount = 0     //A 20211115
+    accResult = 0          //A 20211115
 
-    ResultConfirmedDiscount = 0  //A 20211115
+    resultConfirmedDiscount = 0  //A 20211115
    
     
 
-    if(ConfirmedPrice == 0d){
+    if(confirmedPrice == 0d){
       // Calculate confirmed price from receiving lines
-      ResultDiscount = (1 - (0.01 * Discount1)) * (1 - (0.01 * Discount2)) * (1 - (0.01 * Discount3))
+      resultDiscount = (1 - (0.01 * discount1)) * (1 - (0.01 * discount2)) * (1 - (0.01 * discount3))
       // Get information from receiving lines
-      List<DBContainer> ResultFGRECL = ListFGRECL(Company, Division, PurchaseOrder, PurchaseLine, PurchaseSuffix) 
+      List<DBContainer> ResultFGRECL = listFGRECL(company, division, purchaseOrder, purchaseLine, purchaseSuffix) 
       for (DBContainer RecLine : ResultFGRECL){   
         // Accumulate quantity   
         RCAC = RecLine.get("F2RCAC") 
         SERA = RecLine.get("F2SERA") 
         IVQT = RecLine.get("F2IVQT")  
    
-        logger.info("RCAC = ${RCAC}")     //A 20211111
-        logger.info("SERA = ${SERA}")     //A 20211111
-        logger.info("IVQT = ${IVQT}")     //A 20211111
-   
-        AccRecCostAmount =+ RCAC 
-        AccRecExcRate =+ SERA
-        AccRecQty =+ IVQT * LineAmount 
+        accRecCostAmount =+ RCAC 
+        accRecExcRate =+ SERA
+        accRecQty =+ IVQT * lineAmount 
         
-        if(AccRecExcRate != 0){
-          AccResult = (AccRecCostAmount / AccRecExcRate)  * ResultDiscount 
-          BigDecimal RecConfirmedPrice  = BigDecimal.valueOf(AccResult) 
+        if(accRecExcRate != 0){
+          accResult = (accRecCostAmount / accRecExcRate)  * resultDiscount 
+          BigDecimal RecConfirmedPrice  = BigDecimal.valueOf(accResult) 
           RecConfirmedPrice = RecConfirmedPrice.setScale(2, RoundingMode.HALF_UP) 
           if(RecConfirmedPrice == 0d){
-            if(AccRecQty == 0d){ 
-              OutUNPR = String.valueOf(LineQty)
+            if(accRecQty == 0d){ 
+              outUNPR = String.valueOf(lineQty)
             }else{ 
-              OutUNPR = String.valueOf(AccRecQty) 
+              outUNPR = String.valueOf(accRecQty) 
             }
           }else{ 
-            OutUNPR = String.valueOf(RecConfirmedPrice) 
+            outUNPR = String.valueOf(RecConfirmedPrice) 
           } 
         }else{
-          AccResult = AccRecCostAmount * ResultDiscount   
-          BigDecimal RecConfirmedPrice  = BigDecimal.valueOf(AccResult) 
+          accResult = accRecCostAmount * resultDiscount   
+          BigDecimal RecConfirmedPrice  = BigDecimal.valueOf(accResult) 
           RecConfirmedPrice = RecConfirmedPrice.setScale(2, RoundingMode.HALF_UP) 
           if(RecConfirmedPrice == 0d){ 
-             OutUNPR = String.valueOf(AccRecQty * LineAmount)
+             outUNPR = String.valueOf(accRecQty * lineAmount)
           }else{ 
-             OutUNPR = String.valueOf(RecConfirmedPrice) 
+             outUNPR = String.valueOf(RecConfirmedPrice) 
           } 
         }  
       }  
     }else{
        // Use confirmed price from orderline
-       ResultConfirmedDiscount = (1 - (0.01 * ConfirmedDiscount1)) * (1 - (0.01 * ConfirmedDiscount2)) * (1 - (0.01 * ConfirmedDiscount3))
-       AccResult = ConfirmedPrice * ResultConfirmedDiscount
-       BigDecimal POConfirmedPrice  = BigDecimal.valueOf(AccResult) 
+       resultConfirmedDiscount = (1 - (0.01 * confirmedDiscount1)) * (1 - (0.01 * confirmedDiscount2)) * (1 - (0.01 * confirmedDiscount3))
+       accResult = confirmedPrice * resultConfirmedDiscount
+       BigDecimal POConfirmedPrice  = BigDecimal.valueOf(accResult) 
        POConfirmedPrice = POConfirmedPrice.setScale(2, RoundingMode.HALF_UP) 
-       OutUNPR = String.valueOf(POConfirmedPrice)
+       outUNPR = String.valueOf(POConfirmedPrice)
     } 
     
     // Loop Rec invoice header information, to accumulate value  
-    AccInvQty = 0
-    AccInvAmount = 0
+    accInvQty = 0
+    accInvAmount = 0
     
-    PurchaseLine = 0
-    PurchaseSuffix = 0
-    RecNumber = 0 
-    List<DBContainer> ResultFGRECLHead = ListFGRECL(Company, Division, PurchaseOrder, PurchaseLine, PurchaseSuffix) 
+    purchaseLine = 0
+    purchaseSuffix = 0
+    recNumber = 0 
+    List<DBContainer> ResultFGRECLHead = listFGRECL(company, division, purchaseOrder, purchaseLine, purchaseSuffix) 
     for (DBContainer RecLine : ResultFGRECLHead){ 
       // Accumulate quantity   
       RCAC = RecLine.get("F2RCAC") 
       SERA = RecLine.get("F2SERA")  
    
-      AccRecCostAmount =+ RCAC 
-      AccRecExcRate =+ SERA 
+      accRecCostAmount =+ RCAC 
+      accRecExcRate =+ SERA 
     }
      
     // Summarize to output value 
-    if(AccRecExcRate != 0){
-      AccResult = (AccRecCostAmount / AccRecExcRate)  
-      BigDecimal RecConfirmedPrice  = BigDecimal.valueOf(AccResult) 
+    if(accRecExcRate != 0){
+      accResult = (accRecCostAmount / accRecExcRate)  
+      BigDecimal RecConfirmedPrice  = BigDecimal.valueOf(accResult) 
       RecConfirmedPrice = RecConfirmedPrice.setScale(2, RoundingMode.HALF_UP) 
       if(RecConfirmedPrice == 0d){  
-        OutDEAH = String.valueOf(0)
+        outDEAH = String.valueOf(0)
       }else{ 
-        OutDEAH = String.valueOf(RecConfirmedPrice)
+        outDEAH = String.valueOf(RecConfirmedPrice)
       } 
     }else{  
-        OutDEAH = String.valueOf(0)
+        outDEAH = String.valueOf(0)
     }  
    
      
     // Loop and send to output Rec invoice line information   
-    OutSUDO = ""  //A 20211115
-    OutRPQT = ""  //A 20211115
-    OutTRDT = ""  //A 20211115
-    OutREPN = ""  //A 20211115
-    OutGRIQ = ""  //A 20211115
-    OutGRAM = ""  //A 20211115
-    OutCOMP = ""  //A 20211115
-    OutDEAL = ""  //A 20211115
+    outSUDO = ""  //A 20211115
+    outRPQT = ""  //A 20211115
+    outTRDT = ""  //A 20211115
+    outREPN = ""  //A 20211115
+    outGRIQ = ""  //A 20211115
+    outGRAM = ""  //A 20211115
+    outCOMP = ""  //A 20211115
+    outDEAL = ""  //A 20211115
 
-    AlreadySentOut = false
-    PurchaseOrder = line.get("IBPUNO")   //A 20211115
-    PurchaseLine = line.get("IBPNLI") 
-    PurchaseSuffix = line.get("IBPNLS")  
-    List<DBContainer> ResultFGRECL = ListFGRECL(Company, Division, PurchaseOrder, PurchaseLine, PurchaseSuffix) 
+    alreadySentOut = false
+    purchaseOrder = line.get("IBPUNO")   //A 20211115
+    purchaseLine = line.get("IBPNLI") 
+    purchaseSuffix = line.get("IBPNLS")  
+    List<DBContainer> ResultFGRECL = listFGRECL(company, division, purchaseOrder, purchaseLine, purchaseSuffix) 
     for (DBContainer RecLine : ResultFGRECL){   
     
       // Output   
-      OutSUDO = String.valueOf(RecLine.get("F2SUDO")) 
-      OutRPQT = String.valueOf(RecLine.get("F2RPQT")) 
-      OutTRDT = String.valueOf(RecLine.get("F2TRDT"))  
-      OutREPN = String.valueOf(RecLine.get("F2REPN")) 
-      OutGRIQ = String.valueOf(RecLine.get("F2IVQT"))
+      outSUDO = String.valueOf(RecLine.get("F2SUDO")) 
+      outRPQT = String.valueOf(RecLine.get("F2RPQT")) 
+      outTRDT = String.valueOf(RecLine.get("F2TRDT"))  
+      outREPN = String.valueOf(RecLine.get("F2REPN")) 
+      outGRIQ = String.valueOf(RecLine.get("F2IVQT"))
       if(RecLine.get("F2IMST") == 9){ 
-        OutCOMP = "Yes" 
+        outCOMP = "Yes" 
       }else{ 
-        OutCOMP = "No" 
+        outCOMP = "No" 
       } 
         
       // Accumulate quantity   
-      RecCostAmount = RecLine.get("F2RCAC") 
-      RecExcRate = RecLine.get("F2SERA")   
+      recCostAmount = RecLine.get("F2RCAC") 
+      recExcRate = RecLine.get("F2SERA")   
    
-      if(RecExcRate != 0){
-        Result = (RecCostAmount / RecExcRate)  
-        BigDecimal RecConfirmedPrice  = BigDecimal.valueOf(Result) 
-        RecConfirmedPrice = RecConfirmedPrice.setScale(2, RoundingMode.HALF_UP) 
-        if(RecConfirmedPrice == 0d){  
-          OutDEAL = String.valueOf(0)  
-          OutGRAM = String.valueOf(0)  
+      if(recExcRate != 0){
+        result = (recCostAmount / recExcRate)  
+        BigDecimal recConfirmedPrice  = BigDecimal.valueOf(result) 
+        recConfirmedPrice = recConfirmedPrice.setScale(2, RoundingMode.HALF_UP) 
+        if(recConfirmedPrice == 0d){  
+          outDEAL = String.valueOf(0)  
+          outGRAM = String.valueOf(0)  
         }else{ 
-          OutDEAL = String.valueOf(RecConfirmedPrice)
-          OutGRAM = String.valueOf(RecConfirmedPrice)
+          outDEAL = String.valueOf(recConfirmedPrice)
+          outGRAM = String.valueOf(recConfirmedPrice)
         } 
       }else{  
-        OutDEAL = String.valueOf(0)  
-        OutGRAM = String.valueOf(0) 
+        outDEAL = String.valueOf(0)  
+        outGRAM = String.valueOf(0) 
       } 
     
-      OutGRIQ = ""   //A 20211115
-      OutGRIA = ""   //A 20211115
+      outGRIQ = ""   //A 20211115
+      outGRIA = ""   //A 20211115
       // Get Rec invoice line information  (FGINLI)  
       // - rec number level   
-      List<DBContainer> ResultFGINLIRec = ListFGINLI(Company, PurchaseOrder, PurchaseLine, PurchaseSuffix, RecNumber) 
+      List<DBContainer> ResultFGINLIRec = listFGINLI(company, purchaseOrder, purchaseLine, purchaseSuffix, recNumber) 
       for (DBContainer InvLine : ResultFGINLIRec){ 
          // Accumulate quantity   
          IVQT = InvLine.get("F5IVQT") 
          IVNA = InvLine.get("F5IVNA") 
    
-         AccInvQty =+ IVQT 
-         AccInvAmount =+ IVNA 
+         accInvQty =+ IVQT 
+         accInvAmount =+ IVNA 
       }
      
-      OutGRIQ = String.valueOf(AccInvQty)
-      OutGRIA = String.valueOf(AccInvAmount)  
+      outGRIQ = String.valueOf(accInvQty)
+      outGRIA = String.valueOf(accInvAmount)  
       
       // - line level 
-      RecNumber = 0
-      OutTIVA = ""  //A 20211115
-      List<DBContainer> ResultFGINLILine = ListFGINLI(Company, PurchaseOrder, PurchaseLine, PurchaseSuffix, RecNumber) 
+      recNumber = 0
+      outTIVA = ""  //A 20211115
+      List<DBContainer> ResultFGINLILine = listFGINLI(company, purchaseOrder, purchaseLine, purchaseSuffix, recNumber) 
       for (DBContainer InvLine : ResultFGINLILine){  
         // Accumulate amount   
         IVNA = InvLine.get("F5IVNA") 
-        AccInvAmount =+ IVNA 
+        accInvAmount =+ IVNA 
       } 
     
-      OutTIVA = String.valueOf(AccInvAmount) 
+      outTIVA = String.valueOf(accInvAmount) 
     
       // - header level 
-      PurchaseLine = 0
-      PurchaseSuffix = 0
-      RecNumber = 0
-      OutIVNA = ""  //A 20211115
-      List<DBContainer> ResultFGINLIHead = ListFGINLI(Company, PurchaseOrder, PurchaseLine, PurchaseSuffix, RecNumber) 
+      purchaseLine = 0
+      purchaseSuffix = 0
+      recNumber = 0
+      outIVNA = ""  //A 20211115
+      List<DBContainer> ResultFGINLIHead = listFGINLI(company, purchaseOrder, purchaseLine, purchaseSuffix, recNumber) 
         for (DBContainer InvLine : ResultFGINLIHead){  
           // Accumulate quantity  
           IVNA = InvLine.get("F5IVNA") 
-          AccInvAmount =+ IVNA 
+          accInvAmount =+ IVNA 
         }
       
-      OutIVNA = String.valueOf(AccInvAmount)    
+      outIVNA = String.valueOf(accInvAmount)    
      
       // Send Output parameter, for all received lines 
-      SetOutPut()
+      setOutput()
       mi.write()   
-      AlreadySentOut = true 
+      alreadySentOut = true 
     } 
    
     // Send Output parameter when no receiving lines exist, send the lines information
-    if(!AlreadySentOut){  
-      SetOutPut()
+    if(!alreadySentOut){  
+      setOutput()
       mi.write() 
     } 
   }  

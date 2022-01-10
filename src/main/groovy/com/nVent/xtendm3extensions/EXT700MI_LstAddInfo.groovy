@@ -22,24 +22,22 @@ public class LstAddInfo extends ExtendM3Transaction {
   private final LoggerAPI logger;  
   
   // Definition 
-  public int Company  
-  public int InCONO  
-  public String InDIVI
-  public String InINBN
+  public int company  
+  public int inCONO  
+  public String inDIVI
+  public String inINBN
   public int INBN
-  public String InPEXN
+  public String inPEXN
   public int PEXN
-  public String InPEXI
-  public String InPEXS
-  
+
     
   // Definition of output fields
-  public String OutCONO 
-  public String OutDIVI
-  public String OutINBN  
-  public String OutPEXN
-  public String OutPEXI
-  public String OutPEXS  
+  public String outCONO 
+  public String outDIVI
+  public String outINBN  
+  public String outPEXN
+  public String outPEXI
+  public String outPEXS  
 
 
   
@@ -50,7 +48,30 @@ public class LstAddInfo extends ExtendM3Transaction {
      this.program = program;
      this.logger = logger; 
   } 
+
      
+  //******************************************************************** 
+  // Main 
+  //********************************************************************  
+  public void main() { 
+      // Get LDA company if not entered 
+      int inCONO = getCONO()  
+      
+      inDIVI = mi.in.get("DIVI")  
+      inINBN = mi.in.get("INBN")  
+      INBN = mi.in.get("INBN") as Integer
+      inPEXN = mi.in.get("PEXN") 
+
+      if(isNullOrEmpty(inPEXN)){ 
+        PEXN = 0
+      }else{
+        PEXN = mi.in.get("PEXN") as Integer
+      } 
+
+      // Start the listing in FAPIBA
+      lstFAPIBARecord()
+   
+  }
      
                 
   //******************************************************************** 
@@ -65,29 +86,6 @@ public class LstAddInfo extends ExtendM3Transaction {
     
   } 
 
-
-  //******************************************************************** 
-  // Main 
-  //********************************************************************  
-  public void main() { 
-      // Get LDA company if not entered 
-      int InCONO = getCONO()  
-      
-      InDIVI = mi.in.get("DIVI")  
-      InINBN = mi.in.get("INBN")  
-      INBN = mi.in.get("INBN") as Integer
-      InPEXN = mi.in.get("PEXN") 
-
-      if(isNullOrEmpty(InPEXN)){ 
-        PEXN = 0
-      }else{
-        PEXN = mi.in.get("PEXN") as Integer
-      } 
-
-      // Start the listing in FAPIBA
-      LstFAPIBARecord()
-   
-  }
  
   //******************************************************************** 
   // Check if null or empty
@@ -97,6 +95,7 @@ public class LstAddInfo extends ExtendM3Transaction {
             return false;
         return true;
     }
+
     
   //******************************************************************** 
   // Get date in yyyyMMdd format
@@ -110,14 +109,14 @@ public class LstAddInfo extends ExtendM3Transaction {
   //******************************************************************** 
   // Set Output data
   //******************************************************************** 
-  void SetOutPut() {
+  void setOutPut() {
      
-    mi.outData.put("CONO", OutCONO) 
-    mi.outData.put("DIVI", OutDIVI)
-    mi.outData.put("INBN", OutINBN)
-    mi.outData.put("PEXN", OutPEXN)
-    mi.outData.put("PEXI", OutPEXI)  
-    mi.outData.put("PEXS", OutPEXS)  
+    mi.outData.put("CONO", outCONO) 
+    mi.outData.put("DIVI", outDIVI)
+    mi.outData.put("INBN", outINBN)
+    mi.outData.put("PEXN", outPEXN)
+    mi.outData.put("PEXI", outPEXI)  
+    mi.outData.put("PEXS", outPEXS)  
 
   } 
     
@@ -125,17 +124,17 @@ public class LstAddInfo extends ExtendM3Transaction {
   //******************************************************************** 
   // List all information for the Invoice Batch Number
   //********************************************************************  
-   void LstFAPIBARecord(){   
+   void lstFAPIBARecord(){   
      
      // List all Additional Info lines
      ExpressionFactory expression = database.getExpressionFactory("FAPIBA")
    
      // Depending on input value
-     if(PEXN>0){
-       expression = expression.eq("E7CONO", String.valueOf(CONO)).and(expression.eq("E7DIVI", InDIVI)).and(expression.eq("E7INBN", String.valueOf(INBN))).and(expression.eq("E7PEXN", String.valueOf(PEXN)))
+     /*if(PEXN>0){
+       expression = expression.eq("E7CONO", String.valueOf(CONO)).and(expression.eq("E7DIVI", inDIVI)).and(expression.eq("E7INBN", String.valueOf(INBN))).and(expression.eq("E7PEXN", String.valueOf(PEXN)))
      } else {
-       expression = expression.eq("E7CONO", String.valueOf(CONO)).and(expression.eq("E7DIVI", InDIVI)).and(expression.eq("E7INBN", String.valueOf(INBN)))
-     }
+       expression = expression.eq("E7CONO", String.valueOf(CONO)).and(expression.eq("E7DIVI", inDIVI)).and(expression.eq("E7INBN", String.valueOf(INBN)))
+     }*/
      
      // List Additional info lines 
      DBAction actionline = database.table("FAPIBA").index("00").matching(expression).selection("E7CONO", "E7DIVI", "E7INBN", "E7PEXN", "E7PEXI", "E7PEXS").build()  
@@ -144,7 +143,17 @@ public class LstAddInfo extends ExtendM3Transaction {
      
      // Read with one key  
      line.set("E7CONO", CONO) 
-     actionline.readAll(line, 1, releasedLineProcessor)   
+	   line.set("E7DIVI", inDIVI)                      //A 20220109
+	   line.set("E7INBN", INBN)                        //A 20220109
+	   line.set("E7PEXN", PEXN)                        //A 20220109
+	 
+	   if (PEXN>0) {                                    //A 20220109
+		   actionline.readAll(line, 4, releasedLineProcessor)     //A 20220109
+	   } else {                                                                     //A 20220109
+	     actionline.readAll(line, 3, releasedLineProcessor)      //A 20220109
+	   }                                                                              //A 20220109
+	   
+	   //actionline.readAll(line, 1, releasedLineProcessor)     //D 20220109
    
    } 
 
@@ -155,16 +164,16 @@ public class LstAddInfo extends ExtendM3Transaction {
   Closure<?> releasedLineProcessor = { DBContainer line ->   
   
   // Output selectAllFields 
-  OutCONO = String.valueOf(line.get("E7CONO")) 
-  OutDIVI = String.valueOf(line.get("E7DIVI"))  
-  OutINBN = String.valueOf(line.get("E7INBN"))  
-  OutPEXN = String.valueOf(line.get("E7PEXN"))
-  OutPEXI = String.valueOf(line.get("E7PEXI"))
-  OutPEXS = String.valueOf(line.get("E7PEXS"))
+  outCONO = String.valueOf(line.get("E7CONO")) 
+  outDIVI = String.valueOf(line.get("E7DIVI"))  
+  outINBN = String.valueOf(line.get("E7INBN"))  
+  outPEXN = String.valueOf(line.get("E7PEXN"))
+  outPEXI = String.valueOf(line.get("E7PEXI"))
+  outPEXS = String.valueOf(line.get("E7PEXS"))
     
 
   // Send Output
-  SetOutPut()
+  setOutPut()
   mi.write() 
 } 
 }
