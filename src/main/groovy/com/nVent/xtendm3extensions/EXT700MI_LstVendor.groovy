@@ -201,12 +201,15 @@ public class LstVendor extends ExtendM3Transaction {
 
      // List Purchase order line   
      //DBAction actionline = database.table("CIDMAS").index("00").matching(expression).selectAllFields().build()     //D 20220108
-	 DBAction actionline = database.table("CIDMAS").index("00").matching(expression).selection("IDCONO", "IDSUNO", "IDSUNM", "IDSTAT", "IDPHNO", "IDTFNO", "IDCSCD", "IDECAR", "IDVRNO").build()   //A 20220108 
+	   DBAction actionline = database.table("CIDMAS").index("00").matching(expression).selection("IDCONO", "IDSUNO", "IDSUNM", "IDSTAT", "IDPHNO", "IDTFNO", "IDCSCD", "IDECAR", "IDVRNO").build()   //A 20220108 
      DBContainer line = actionline.getContainer()  
      
      // Read with one key  
      line.set("IDCONO", CONO)  
-     actionline.readAll(line, 1, mi.getMaxRecords(), releasedLineProcessor)   
+     
+     int pageSize = mi.getMaxRecords() <= 0 ? 1000 : mi.getMaxRecords()           //A 20220112
+
+     actionline.readAll(line, 1, pageSize, releasedLineProcessor)   
    
    } 
     

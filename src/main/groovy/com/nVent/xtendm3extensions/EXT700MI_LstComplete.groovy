@@ -380,12 +380,14 @@ public class LstComplete extends ExtendM3Transaction {
      
      // Read with one key  
      line.set("IBCONO", CONO) 
-	   line.set("IBPUNO", PO)                                        //A 20220108
+	   line.set("IBPUNO", PO)                                                       //A 20220108
+     
+     int pageSize = mi.getMaxRecords() <= 0 ? 1000 : mi.getMaxRecords()           //A 20220112
      
      if(!isNullOrEmpty(PO)){                                                       //A 20220108
-       actionline.readAll(line, 2, mi.getMaxRecords(), releasedLineProcessor)      //A 20220108
+       actionline.readAll(line, 2, pageSize, releasedLineProcessor)                //A 20220108
      } else {                                                                      //A 20220108
-	     actionline.readAll(line, 1, mi.getMaxRecords(), releasedLineProcessor)      //A 20220108
+	     actionline.readAll(line, 1, pageSize, releasedLineProcessor)                //A 20220108
      }                                                                             //A 20220108
      //actionline.readAll(line, 1, releasedLineProcessor)                          //D 20220108
    

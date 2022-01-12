@@ -120,7 +120,7 @@ public class LstByChangeDate extends ExtendM3Transaction {
       inLMDT = mi.in.get("LMDT")  
 
       // Start the listing in CIDMAS
-      LstInvoiceLines()
+      lstInvoiceLines()
    
   }
   
@@ -532,7 +532,7 @@ public class LstByChangeDate extends ExtendM3Transaction {
   //******************************************************************** 
   // List all information
   //********************************************************************  
-   void LstInvoiceLines(){   
+   void lstInvoiceLines(){   
      
      // List all Invoice Delivery Lines
      ExpressionFactory expression = database.getExpressionFactory("ODLINE")
@@ -547,7 +547,10 @@ public class LstByChangeDate extends ExtendM3Transaction {
      
      // Read with one key  
      line.set("UBCONO", CONO)  
-     actionline.readAll(line, 1, mi.getMaxRecords(), releasedLineProcessor)   
+     
+     int pageSize = mi.getMaxRecords() <= 0 ? 1000 : mi.getMaxRecords()           //A 20220112
+
+     actionline.readAll(line, 1, pageSize, releasedLineProcessor)   
    
    } 
  
