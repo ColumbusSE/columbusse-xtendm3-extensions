@@ -1,3 +1,11 @@
+/**
+ * This extension is used to create records in TCERRM for BatchOrders if validation fails for customer in MFS610
+ *
+ * Name: OIS100MI_AddBatchHead.groovy
+ *
+ * Date         Changed By                         Description
+ * 210902       Jagannath Sawant (Columbus)           create records in TCERRM for BatchOrders if validation fails for customer in MFS610
+ */
 import groovy.json.JsonException
 import groovy.json.JsonSlurper
 import java.time.LocalDateTime;  
@@ -24,7 +32,8 @@ public class BlockCO_MFS610 extends ExtendM3Trigger {
   // Get Division
   //******************************************************************** 
   private Optional<DBContainer> findDivision(Integer CONO, String FACI){   
-    DBAction query = database.table("CFACIL").index("00").selectAllFields().build()
+    //DBAction query = database.table("CFACIL").index("00").selectAllFields().build()
+	DBAction query = database.table("CFACIL").index("00").selection("CFCONO", "CFFACI").build()
     def CFACIL = query.getContainer()
     CFACIL.set("CFCONO", CONO)
     CFACIL.set("CFFACI", FACI)
@@ -40,7 +49,8 @@ public class BlockCO_MFS610 extends ExtendM3Trigger {
   // Get MFS610
   //******************************************************************** 
   private Optional<DBContainer> findMFS610(Integer CONO, String CUNO, String DIVI){   
-    DBAction query = database.table("CCUDIV").index("00").selectAllFields().build()
+    //DBAction query = database.table("CCUDIV").index("00").selectAllFields().build()
+	DBAction query = database.table("CCUDIV").index("00").selection("OKCONO", "OKCUNO", "OKDIVI").build()
     def CCUDIV = query.getContainer()
     CCUDIV.set("OKCONO", CONO)
     CCUDIV.set("OKCUNO", CUNO)
@@ -68,12 +78,14 @@ public class BlockCO_MFS610 extends ExtendM3Trigger {
   }
   
   void GetFacility()  {
-     DBAction action = database.table("OXCNTR").index("00").selectAllFields().build()
+     //DBAction action = database.table("OXCNTR").index("00").selectAllFields().build()
+	 DBAction action = database.table("OXCNTR").index("00").selection("EVCONO", "EVORNO").build()
      DBContainer ext = action.getContainer()
     
      ext.set("EVCONO", this.Company)
      ext.set("EVORNO",  this.OrderNumber)
-     action.readAll(ext, 2, releasedItemProcessor) 
+     //action.readAll(ext, 2, releasedItemProcessor) 
+	 action.read(ext, 2, releasedItemProcessor) 
   }
   
     
@@ -88,11 +100,11 @@ public class BlockCO_MFS610 extends ExtendM3Trigger {
         DBContainer containerCFACIL = CFACIL.get()    
         this.Division = containerCFACIL.getString("CFDIVI")
         
-        // Get Email address for Buyer
+        // Update TCERRM
         Optional<DBContainer> CCUDIV = findMFS610(this.Company, this.CustomerNumber,  this.Division)
         if(!CCUDIV.isPresent()){
-          // Record found, continue to get information  
-          DBAction action = database.table("TCERRM").index("00").selectAllFields().build()
+          //DBAction action = database.table("TCERRM").index("00").selectAllFields().build()
+		  DBAction action = database.table("TCERRM").index("00").selection("EVCONO", "EVDIVI", "EVID01", "EVID02", "EVID03", "EVID04", "EVID05", "EVMSID", "EVPGNM", "EVMDTA", "EVRGDT", "EVRGTM", "EVRGNR").build()
           DBContainer ext2 = action.createContainer()
           ext2.set("EVCONO", this.Company)
           ext2.set("EVDIVI", "ALL")
