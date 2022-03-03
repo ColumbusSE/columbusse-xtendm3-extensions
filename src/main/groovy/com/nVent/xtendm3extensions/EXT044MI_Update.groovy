@@ -15,6 +15,11 @@ public class Update extends ExtendM3Transaction {
   private final DatabaseAPI database; 
   private final ProgramAPI program;
   
+  public int newLEA1
+  public int oldLEA1 
+  public int oldLEAT  
+  public int newLEAT   
+
   
   public Update(MIAPI mi, DatabaseAPI database,ProgramAPI program) {
      this.mi = mi;
@@ -58,28 +63,33 @@ public class Update extends ExtendM3Transaction {
         return             
      }  
 
-     // GetLeadtime
-     String LEA1 = mi.in.get("LEA1")  
-
      // Validate MITVEX
      Optional<DBContainer> MITVEX = findMITVEX(CONO, ITNO, SUNO, WHLO)
      if(!MITVEX.isPresent()){
         mi.error("MITVEX record doesn't exists")   
         return             
      } else {
+        newLEA1 = mi.in.get("LEA1")  
+        // Save the old lead time value
+        DBContainer containerMITVEX = MITVEX.get() 
+        oldLEA1 = containerMITVEX.get("EXLEA1")
         // Update record 
-        updRecord(CONO, ITNO, SUNO, WHLO, LEA1)
+        updRecord(CONO, ITNO, SUNO, WHLO)
      }  
 
-    // Validate MITBAL
-    Optional<DBContainer> MITBAL = findMITBAL(CONO, ITNO, WHLO)
-    if(!MITBAL.isPresent()){
+     // Validate MITBAL
+     Optional<DBContainer> MITBAL = findMITBAL(CONO, ITNO, WHLO)
+     if(!MITBAL.isPresent()){
         mi.error("MITBAL record doesn't exist")   
         return             
-    } else {
+     } else {
+        // Save the lead time value
+        DBContainer containerMITBAL = MITBAL.get() 
+        oldLEAT = containerMITBAL.get("MBLEAT")
         // Update MITBAL with new Lead Time values
         updMITBAL(CONO, ITNO, WHLO)       
-    }  
+     } 
+    
   }
  
   public  boolean isNullOrEmpty(String key) {
@@ -186,7 +196,7 @@ public class Update extends ExtendM3Transaction {
   //******************************************************************** 
   // Update MITVEX record
   //********************************************************************    
-  void updRecord(Integer CONO, String ITNO, String SUNO, String WHLO, String LEA1){ 
+  void updRecord(Integer CONO, String ITNO, String SUNO, String WHLO){ 
      
      DBAction action = database.table("MITVEX").index("00").selectAllFields().build()
      DBContainer MITVEX = action.getContainer()
@@ -224,7 +234,9 @@ public class Update extends ExtendM3Transaction {
      lockedResult.update()
   }
      
-     
+  //******************************************************************** 
+  // Update MITBAL with Lead time
+  //********************************************************************         
  void updMITBAL(Integer CONO, String ITNO, String WHLO){      
      DBAction action = database.table("MITBAL").index("00").selection("MBCONO", "MBWHLO", "MBITNO", "MBLEA1", "MBLEAT", "MBLMDT", "MBCHNO", "MBCHID").build()
      DBContainer MITBAL = action.getContainer()
@@ -244,19 +256,16 @@ public class Update extends ExtendM3Transaction {
      DateTimeFormatter format1 = DateTimeFormatter.ofPattern("yyyyMMdd");  
      String formatDate = now.format(format1);    
      
-     int supplierLeadTime = mi.in.get("LEA1")
-     
-     int totalLeadTime = lockedResult.get("MBLEAT")     
-     int newTotalLeadTime = totalLeadTime + supplierLeadTime 
+     newLEAT = oldLEAT - oldLEA1 + newLEA1
      
      int changeNo = lockedResult.get("MBCHNO")
      int newChangeNo = changeNo + 1 
      
      //Set Supplier Lead Time
-     lockedResult.set("MBLEA1", supplierLeadTime) 
+     lockedResult.set("MBLEA1", newLEA1) 
      
      //Set Total Lead Time
-     lockedResult.set("MBLEAT", newTotalLeadTime) 
+     lockedResult.set("MBLEAT", newLEAT) 
         
      // Update changed information
      int changeddate=Integer.parseInt(formatDate);   

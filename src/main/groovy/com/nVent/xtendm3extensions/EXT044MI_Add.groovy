@@ -241,6 +241,9 @@ public class Add extends ExtendM3Transaction {
  } 
  
  
+  //******************************************************************** 
+  // Update MITBAL with Lead time
+  //********************************************************************    
  void updMITBAL(Integer CONO, String ITNO, String WHLO){        
      DBAction action = database.table("MITBAL").index("00").selection("MBCONO", "MBWHLO", "MBITNO", "MBLEA1", "MBLEAT", "MBLMDT", "MBCHNO", "MBCHID").build()
      DBContainer MITBAL = action.getContainer()

@@ -137,7 +137,9 @@ public class Get extends ExtendM3Transaction {
     return Optional.empty()
   }
 
-   
+ //******************************************************************** 
+ //Get MITVEX record
+ //********************************************************************     
   void getRecord(){      
      DBAction action = database.table("MITVEX").index("00").selectAllFields().build()
      DBContainer MITVEX = action.getContainer()

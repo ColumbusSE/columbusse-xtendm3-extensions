@@ -17,6 +17,8 @@
     private final LoggerAPI logger;
   
     public int LEA1
+    public int oldLEAT   
+    public int newLEAT   
   
   // Constructor 
   public Delete(MIAPI mi, DatabaseAPI database,ProgramAPI program, LoggerAPI logger) {
@@ -62,22 +64,28 @@
         return             
      }  
 
-     // Validate MITBAL
-     Optional<DBContainer> MITBAL = findMITBAL(CONO, ITNO, WHLO)
-     if(!MITBAL.isPresent()){
-     } else {
-        // Update MITBAL with new Lead Time values
-        updMITBAL(CONO, ITNO, WHLO)       
-     }  
-
      // Validate MITVEX
      Optional<DBContainer> MITVEX = findMITVEX(CONO, ITNO, SUNO, WHLO)
      if(!MITVEX.isPresent()){
         mi.error("MITVEX record doesn't exists")   
         return             
      } else {
+        // Save the lead time value before delete
+        DBContainer containerMITVEX = MITVEX.get() 
+        LEA1 = containerMITVEX.get("EXLEA1")
         // Delete record 
         deleteRecord(CONO, ITNO, SUNO, WHLO)
+     }  
+
+     // Validate MITBAL
+     Optional<DBContainer> MITBAL = findMITBAL(CONO, ITNO, WHLO)
+     if(!MITBAL.isPresent()){
+     } else {
+        // Save the lead time value
+        DBContainer containerMITBAL = MITBAL.get() 
+        oldLEAT = containerMITBAL.get("MBLEAT")
+        // Update MITBAL with new Lead Time values
+        updMITBAL(CONO, ITNO, WHLO)       
      }  
 
   }
@@ -204,53 +212,51 @@
     
      Closure<?> deleterCallback = { LockedResult lockedResult ->  
      
-     LEA1 = lockedResult.get("EXLEA1")
-
      lockedResult.delete()
      }
   
+
+   //******************************************************************** 
+   // Update MITBAL with Lead time
+   //********************************************************************    
+   void updMITBAL(Integer CONO, String ITNO, String WHLO){   
   
- void updMITBAL(Integer CONO, String ITNO, String WHLO){   
-
-     DBAction action = database.table("MITBAL").index("00").selection("MBCONO", "MBWHLO", "MBITNO", "MBLEA1", "MBLEAT", "MBLMDT", "MBCHNO", "MBCHID").build()
-     DBContainer MITBAL = action.getContainer()
-           
-     MITBAL.set("MBCONO", CONO)
-     MITBAL.set("MBWHLO", WHLO)
-     MITBAL.set("MBITNO", ITNO)
-
-     // Read with lock
-     action.readLock(MITBAL, updateCallBackMITBAL)     
- }
-
-    
- Closure<?> updateCallBackMITBAL = { LockedResult lockedResult -> 
-      // Get todays date
-     LocalDateTime now = LocalDateTime.now();    
-     DateTimeFormatter format1 = DateTimeFormatter.ofPattern("yyyyMMdd");  
-     String formatDate = now.format(format1);    
-     
-     int supplierLeadTime = LEA1
-     
-     int totalLeadTime = lockedResult.get("MBLEAT")
-     int newTotalLeadTime = totalLeadTime - supplierLeadTime 
-     
-     int changeNo = lockedResult.get("MBCHNO")
-     int newChangeNo = changeNo + 1 
-     
-     //Set Supplier Lead Time
-     lockedResult.set("MBLEA1", supplierLeadTime) 
-     
-     //Set Total Lead Time
-     lockedResult.set("MBLEAT", newTotalLeadTime) 
-        
-     // Update changed information
-     int changeddate=Integer.parseInt(formatDate);   
-     lockedResult.set("MBLMDT", changeddate)  
+       DBAction action = database.table("MITBAL").index("00").selection("MBCONO", "MBWHLO", "MBITNO", "MBLEA1", "MBLEAT", "MBLMDT", "MBCHNO", "MBCHID").build()
+       DBContainer MITBAL = action.getContainer()
+             
+       MITBAL.set("MBCONO", CONO)
+       MITBAL.set("MBWHLO", WHLO)
+       MITBAL.set("MBITNO", ITNO)
+  
+       // Read with lock
+       action.readLock(MITBAL, updateCallBackMITBAL)     
+   }
+  
       
-     lockedResult.set("MBCHNO", newChangeNo) 
-     lockedResult.set("MBCHID", program.getUser())
-     lockedResult.update()
- }
- 
+   Closure<?> updateCallBackMITBAL = { LockedResult lockedResult -> 
+        // Get todays date
+       LocalDateTime now = LocalDateTime.now();    
+       DateTimeFormatter format1 = DateTimeFormatter.ofPattern("yyyyMMdd");  
+       String formatDate = now.format(format1);    
+       
+       newLEAT = oldLEAT - LEA1 
+       
+       int changeNo = lockedResult.get("MBCHNO")
+       int newChangeNo = changeNo + 1 
+       
+       //Set Supplier Lead Time
+       lockedResult.set("MBLEA1", LEA1) 
+       
+       //Set Total Lead Time
+       lockedResult.set("MBLEAT", newLEAT) 
+          
+       // Update changed information
+       int changeddate=Integer.parseInt(formatDate);   
+       lockedResult.set("MBLMDT", changeddate)  
+        
+       lockedResult.set("MBCHNO", newChangeNo) 
+       lockedResult.set("MBCHID", program.getUser())
+       lockedResult.update()
+   }
+   
  }
