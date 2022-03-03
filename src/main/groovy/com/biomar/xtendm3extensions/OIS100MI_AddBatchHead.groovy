@@ -25,8 +25,23 @@ public class BlockCO_MFS610 extends ExtendM3Trigger {
   public String OrderNumber
   public String Division
   public int Company
+  public int Changenumber
   public String User
   
+  public BlockCO_MFS610(DatabaseAPI database, TransactionAPI transaction, ProgramAPI program, LoggerAPI logger) {
+    this.logger = logger;
+    this.program = program;
+    this.transaction = transaction;
+    this.database = database;
+    
+  }
+  
+  public void main() {
+    this.OrderNumber = transaction.parameters.ORNO;
+    this.Company = this.program.LDAZD.CONO as Integer;
+    this.Changenumber = 1;
+    GetFacility()
+  }
  
   //******************************************************************** 
   // Get Division
@@ -62,26 +77,13 @@ public class BlockCO_MFS610 extends ExtendM3Trigger {
     return Optional.empty()
   }
   
-  
-  public BlockCO_MFS610(DatabaseAPI database, TransactionAPI transaction, ProgramAPI program, LoggerAPI logger) {
-    this.logger = logger;
-    this.program = program;
-    this.transaction = transaction;
-    this.database = database;
-    
-  }
-  
-  public void main() {
-    this.OrderNumber = transaction.parameters.ORNO;
-    this.Company = this.program.LDAZD.CONO as Integer;
-    GetFacility()
-  }
-  
+  //******************************************************************** 
+  // Get Facility
+  //******************************************************************** 
   void GetFacility()  {
      //DBAction action = database.table("OXCNTR").index("00").selectAllFields().build()
 	   DBAction action = database.table("OXCNTR").index("00").selection("EVCONO", "EVORNO").build()
      DBContainer ext = action.getContainer()
-    
      ext.set("EVCONO", this.Company)
      ext.set("EVORNO",  this.OrderNumber)
      action.readAll(ext, 2, releasedItemProcessor) 
@@ -104,7 +106,7 @@ public class BlockCO_MFS610 extends ExtendM3Trigger {
         Optional<DBContainer> CCUDIV = findMFS610(this.Company, this.CustomerNumber,  this.Division)
         if(!CCUDIV.isPresent()){
           //DBAction action = database.table("TCERRM").index("00").selectAllFields().build()
-		      DBAction action = database.table("TCERRM").index("00").selection("EVCONO", "EVDIVI", "EVID01", "EVID02", "EVID03", "EVID04", "EVID05", "EVMSID", "EVPGNM", "EVMDTA", "EVRGDT", "EVRGTM", "EVRGNR").build()
+		      DBAction action = database.table("TCERRM").index("00").selection("EVCONO", "EVDIVI", "EVID01", "EVID02", "EVID03", "EVID04", "EVID05", "EVMSID", "EVPGNM", "EVMDTA", "EVRGDT", "EVRGTM", "EVRGNR", "EVCHID", "EVLMDT", "EVCHNO").build()
           DBContainer ext2 = action.createContainer()
           ext2.set("EVCONO", this.Company)
           ext2.set("EVDIVI", "ALL")
@@ -130,6 +132,9 @@ public class BlockCO_MFS610 extends ExtendM3Trigger {
           
           ext2.set("EVRGDT", regdate)
           ext2.set("EVRGTM", regtime)
+          ext2.set("EVLMDT", regdate)
+          ext2.set("EVCHID", program.getUser())
+          ext2.set("EVCHNO", this.Changenumber)
           ext2.set("EVRGNR", 1)
           action.insert(ext2)
         } 
