@@ -112,74 +112,75 @@ public class UpdUsrDefFields extends ExtendM3Transaction {
      
      // Update the fields if filled
      if(mi.in.get("UCA0") != null){  
-        if(mi.in.get("UCA0") == "?"){  
-          lockedResult.set("OAUCA0", "                    ") 
-        } else {
+        //if(mi.in.get("UCA0") == "?"){                         //D 20220303
+        //  lockedResult.set("OAUCA0", "                    ")  //D 20220303
+        //} else {                                              //D 20220303
           lockedResult.set("OAUCA0", mi.in.get("UCA0")) 
-        }
+        //}                                                     //D 20220303
      }
+     
      if(mi.in.get("UCA1") != null){  
-        if(mi.in.get("UCA1") == "?"){  
-          lockedResult.set("OAUCA1", "                    ") 
-        } else {
+        // if(mi.in.get("UCA1") == "?"){                         //D 20220303
+        //   lockedResult.set("OAUCA1", "                    ")  //D 20220303
+        //} else {                                               //D 20220303
           lockedResult.set("OAUCA1", mi.in.get("UCA1")) 
-        }
+        //}                                                      //D 20220303
      }
      if(mi.in.get("UCA2") != null){  
-        if(mi.in.get("UCA2") == "?"){  
-          lockedResult.set("OAUCA2", "                    ") 
-        } else {
+        //if(mi.in.get("UCA2") == "?"){                          //D 20220303
+        //  lockedResult.set("OAUCA2", "                    ")   //D 20220303
+        //} else {                                               //D 20220303
           lockedResult.set("OAUCA2", mi.in.get("UCA2")) 
-        }
+        //}                                                      //D 20220303
      }
      if(mi.in.get("UCA3") != null){  
-        if(mi.in.get("UCA3") == "?"){  
-          lockedResult.set("OAUCA3", "                    ") 
-        } else {
+        //if(mi.in.get("UCA3") == "?"){                          //D 20220303
+        //  lockedResult.set("OAUCA3", "                    ")   //D 20220303
+        //} else {                                               //D 20220303
           lockedResult.set("OAUCA3", mi.in.get("UCA3")) 
-        }
+        //}                                                      //D 20220303
      }
      if(mi.in.get("UCA4") != null){  
-        if(mi.in.get("UCA4") == "?"){  
-          lockedResult.set("OAUCA4", "                    ") 
-        } else {
+        //if(mi.in.get("UCA4") == "?"){                          //D 20220303
+        //  lockedResult.set("OAUCA4", "                    ")   //D 20220303
+        //} else {                                               //D 20220303
           lockedResult.set("OAUCA4", mi.in.get("UCA4")) 
-        }
+        //}                                                      //D 20220303
      }
      if(mi.in.get("UCA5") != null){  
-        if(mi.in.get("UCA5") == "?"){  
-          lockedResult.set("OAUCA5", "                    ") 
-        } else {
+        //if(mi.in.get("UCA5") == "?"){                          //D 20220303
+        //  lockedResult.set("OAUCA5", "                    ")   //D 20220303
+        //} else {                                               //D 20220303
           lockedResult.set("OAUCA5", mi.in.get("UCA5")) 
-        }
+        //}                                                      //D 20220303
      }
      if(mi.in.get("UCA6") != null){  
-        if(mi.in.get("UCA6") == "?"){  
-          lockedResult.set("OAUCA6", "                    ") 
-        } else {
+        //if(mi.in.get("UCA6") == "?"){                          //D 20220303
+        //  lockedResult.set("OAUCA6", "                    ")   //D 20220303
+        //} else {                                               //D 20220303
           lockedResult.set("OAUCA6", mi.in.get("UCA6")) 
-        }
+        //}                                                      //D 20220303
      }
      if(mi.in.get("UCA7") != null){  
-        if(mi.in.get("UCA7") == "?"){  
-          lockedResult.set("OAUCA7", "                    ") 
-        } else {
+        //if(mi.in.get("UCA7") == "?"){                          //D 20220303
+        //  lockedResult.set("OAUCA7", "                    ")   //D 20220303
+        //} else {                                               //D 20220303
           lockedResult.set("OAUCA7", mi.in.get("UCA7")) 
-        }
+        //}                                                      //D 20220303
      }
      if(mi.in.get("UCA8") != null){  
-        if(mi.in.get("UCA8") == "?"){  
-          lockedResult.set("OAUCA8", "                    ") 
-        } else {
+        //if(mi.in.get("UCA8") == "?"){                          //D 20220303
+        //  lockedResult.set("OAUCA8", "                    ")   //D 20220303 
+        //} else {                                               //D 20220303
           lockedResult.set("OAUCA8", mi.in.get("UCA8")) 
-        }
+        //}                                                      //D 20220303
      }
      if(mi.in.get("UCA9") != null){  
-        if(mi.in.get("UCA9") == "?"){  
-          lockedResult.set("OAUCA9", "                    ") 
-        } else {
+        //if(mi.in.get("UCA9") == "?"){                          //D 20220303
+        //  lockedResult.set("OAUCA9", "                    ")   //D 20220303
+        //} else {                                               //D 20220303
           lockedResult.set("OAUCA9", mi.in.get("UCA9")) 
-        }
+        //}                                                      //D 20220303
      }
 
      // Update changed information

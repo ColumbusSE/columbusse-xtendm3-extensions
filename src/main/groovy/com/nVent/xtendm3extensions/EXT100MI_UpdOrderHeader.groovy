@@ -36,7 +36,12 @@ public class UpdOrderHeader extends ExtendM3Transaction {
      
      // Priority
      Integer OPRI = mi.in.get("OPRI")  
-
+     // Priority must be a value between 0 and 9      //A 20220303
+     if (OPRI < 0 || OPRI > 9) {                      //A 20220303
+        mi.error("Priority is not valid")             //A 20220303 
+        return                                        //A 20220303
+     }                                                //A 20220303
+     
      // Validate OOHEAD
      String ORNO = mi.in.get("ORNO")  
      Optional<DBContainer> OOHEAD = findOOHEAD(CONO, ORNO)
