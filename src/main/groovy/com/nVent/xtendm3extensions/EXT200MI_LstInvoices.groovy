@@ -41,27 +41,21 @@ public class LstInvoices extends ExtendM3Transaction {
   public String outPYRS
   public String outIVTP
   public String outTDSC
-  public String outARAT     //A 20220414
-  public String outACAM     //A 20220414
-  public String outCUCD     //A 20220419
-  public String outCRTP     //A 20220419
+  public String outARAT     
+  public String outACAM     
+  public String outCUCD     
+  public String outCRTP     
   
   public Integer CONO
   public String inCONO 
   public int inRECO
   public int invoiceYear
-  public double ARAT       //A 20220419
-  public double CUAM       //A 20220419
-  public double ACAM       //A 20220419
-  public int YEA4          //A 20220419
-  public int JRNO          //A 20220419
-  public int JSNO          //A 20220419
-  public String invoiceNumber
-  //public double invoiceAmount
-  //public double leftOfInvoice
-  public String transactionCode
-  //public String paymentInvoiceNumber
-  //public double paymentAmount
+  public double ARAT       
+  public double CUAM       
+  public double ACAM       
+  public int YEA4          
+  public int JRNO          
+  public int JSNO          
   
   // Constructor 
   public LstInvoices(MIAPI mi, DatabaseAPI database, ProgramAPI program, LoggerAPI logger, MICallerAPI miCaller) {
@@ -147,10 +141,10 @@ public class LstInvoices extends ExtendM3Transaction {
     mi.outData.put("PYRS", outPYRS)
     mi.outData.put("IVTP", outIVTP) 
     mi.outData.put("TDSC", outTDSC)  
-    mi.outData.put("ARAT", outARAT)    //A 20220414
-    mi.outData.put("ACAM", outACAM)    //A 20220414
-    mi.outData.put("CUCD", outCUCD)    //A 20220419
-    mi.outData.put("CRTP", outCRTP)    //A 20220419
+    mi.outData.put("ARAT", outARAT)    
+    mi.outData.put("ACAM", outACAM)    
+    mi.outData.put("CUCD", outCUCD)    
+    mi.outData.put("CRTP", outCRTP)    
   } 
 
    
@@ -159,16 +153,14 @@ public class LstInvoices extends ExtendM3Transaction {
    //********************************************************************  
    void lstInvoices(){  
      
-     invoiceNumber = 0
-     
      // List all Invoice Delivery Lines
      ExpressionFactory expression = database.getExpressionFactory("FSLEDG")
    
      //Filter by invoice year if entered
      if (invoiceYear > 0) {
-        expression = expression.ne("ESRECO", String.valueOf(inRECO)).and(expression.eq("ESINYR", String.valueOf(invoiceYear)))
+        expression = expression.ne("ESRECO", String.valueOf(inRECO)).and(expression.eq("ESTRCD", "10")).and(expression.eq("ESINYR", String.valueOf(invoiceYear)))
      } else {
-        expression = expression.ne("ESRECO", String.valueOf(inRECO))
+        expression = expression.ne("ESRECO", String.valueOf(inRECO)).and(expression.eq("ESTRCD", "10"))
      }
      
      // List Invoice Delivery Lines   
@@ -191,12 +183,7 @@ public class LstInvoices extends ExtendM3Transaction {
   //********************************************************************  
   Closure<?> releasedLineProcessor = { DBContainer line ->     
     
-    transactionCode = String.valueOf(line.get("ESTRCD"))
-    
-    if (transactionCode == "10") {
       // Output selectAllFields 
-      invoiceNumber = String.valueOf(line.get("ESCINO"))
-      outTRCD = transactionCode
       outCONO = String.valueOf(line.get("ESCONO")) 
       outDIVI = String.valueOf(line.get("ESDIVI"))  
       outPYNO = String.valueOf(line.get("ESPYNO"))
@@ -218,27 +205,25 @@ public class LstInvoices extends ExtendM3Transaction {
       outPYRS = String.valueOf(line.get("ESPYRS"))
       outIVTP = String.valueOf(line.get("ESIVTP"))
       outTDSC = String.valueOf(line.get("ESTDSC"))
-      outARAT = String.valueOf(line.get("ESARAT"))   //A 20220414
-      outCUCD = String.valueOf(line.get("ESCUCD"))   //A 20220419
-      outCRTP = String.valueOf(line.get("ESCRTP"))   //A 20220419
+      outARAT = String.valueOf(line.get("ESARAT"))   
+      outCUCD = String.valueOf(line.get("ESCUCD"))   
+      outCRTP = String.valueOf(line.get("ESCRTP"))   
       
-      CUAM = line.get("ESCUAM")                      //A 20220414
+      CUAM = line.get("ESCUAM")                      
 
       outCUAM = String.valueOf(CUAM)
       
-      ARAT = line.get("ESARAT")                      //A 20220414
-      ACAM = ARAT * CUAM                             //A 20220414
-      outACAM = String.valueOf(ACAM)                 //A 20220414
+      ARAT = line.get("ESARAT")                      
+      ACAM = ARAT * CUAM                             
+      outACAM = String.valueOf(ACAM)                 
       
-      YEA4 = line.get("ESYEA4")                      //A 20220414
-      JRNO = line.get("ESJRNO")                      //A 20220414
-      JSNO = line.get("ESJSNO")                      //A 20220414  
+      YEA4 = line.get("ESYEA4")                      
+      JRNO = line.get("ESJRNO")                      
+      JSNO = line.get("ESJSNO")                       
       
       // Send Output
       setOutPut()
-      mi.write() 
-      
-    }     
+      mi.write()    
 
   }
 }
