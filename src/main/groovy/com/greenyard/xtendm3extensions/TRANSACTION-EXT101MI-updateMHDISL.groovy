@@ -7,11 +7,11 @@
  * Date         Changed By                         Description
  * 20220221     Jörg Wanning (Columbus)            Update updateMHDISL/ALWT and POPN, no standard API exist
  * 20220525     Frank Zahlten (Columbus)           get data for MHDISL directly from OOLINE, reduced input parameters
+ * 20220622     Daniel Platzer (Columbus)          Changes according to feedback from Infor XtendM3 team
  */
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.text.SimpleDateFormat
 
 public class UpdateMHDISL extends ExtendM3Transaction {
 	private final MIAPI mi;
@@ -51,7 +51,7 @@ public class UpdateMHDISL extends ExtendM3Transaction {
 
 		if(!validateInput()) {
 			logger.debug("XtendM3Debug_UpdateMHDISL validateInput ended with false!!!!");
-			mi.write()
+			mi.write();
 			return;
 		}
 
@@ -82,14 +82,14 @@ public class UpdateMHDISL extends ExtendM3Transaction {
 		logger.debug("XtendM3Debug_UpdateMHDISL Start - validateInput");
 
 		//check company
-		String company = mi.in.get("CONO")
+		String company = mi.in.get("CONO");
 		if (company == null) {
-			mi.error("Company " + company + " must be entered")
-			return false
+			mi.error("Company " + company + " must be entered");
+			return false;
 		}
 		if(validateCompany(company)){
-			mi.error("Company " + company + " is invalid")
-			return false
+			mi.error("Company " + company + " is invalid");
+			return false;
 		}
 		int cono = mi.in.get("CONO");
 
@@ -145,11 +145,11 @@ public class UpdateMHDISL extends ExtendM3Transaction {
 	//*****************************************************
 	boolean validateCompany(String company){
 		// Run MI program
-		def parameter = [CONO: company]
-		List <String> result = []
+		def parameter = [CONO: company];
+		List <String> result = [];
 		Closure<?> handler = {Map<String, String> response ->
 			return response.CONO == 0}
-		miCaller.call("MNS095MI", "Get", parameter, handler)
+		miCaller.call("MNS095MI", "Get", parameter, handler);
 	}
 
 
@@ -177,10 +177,10 @@ public class UpdateMHDISL extends ExtendM3Transaction {
 		logger.debug("XtendM3Debug_UpdateMHDISL getOOLINE ridn " + ridn);
 		logger.debug("XtendM3Debug_UpdateMHDISL getOOLINE ridl " + ridl.toString());
 		logger.debug("XtendM3Debug_UpdateMHDISL getOOLINE ridx " + ridx.toString());
-		OLINE.set("OBCONO", cono)
-		OLINE.set("OBORNO", ridn)
-		OLINE.set("OBPONR", ridl)
-		OLINE.set("OBPOSX", ridx)
+		OLINE.set("OBCONO", cono);
+		OLINE.set("OBORNO", ridn);
+		OLINE.set("OBPONR", ridl);
+		OLINE.set("OBPOSX", ridx);
 		if (!action_OOLINE.read(OLINE)) {
 			logger.debug("XtendM3Debug_UpdateMHDISL Start - not found OOLINE");
 			mi.error("The order line does not exist ORNO = " + ridn + " PONR " + ridl + "POSX" + ridx);
@@ -221,22 +221,18 @@ public class UpdateMHDISL extends ExtendM3Transaction {
 		MHDISL10.set("URRIDN", ridn);
 		MHDISL10.set("URRIDL", ridl);
 		MHDISL10.set("URRIDX", ridx);
-		query_MHDISL10.readAll(MHDISL10, 5, orderConnectedDLIX)
+		query_MHDISL10.readAll(MHDISL10, 5, orderConnectedDLIX);
 	}
 
 	Closure<?> orderConnectedDLIX = { DBContainer MHDISL10 ->
 		logger.debug("XtendM3Debug_UpdateMHDISL per MHDISL closure orderConnectedDLIX");
-		long mhdisl_DLIX = MHDISL10.get("URDLIX")
-		String str_mhdisl_DLIX = MHDISL10.get("URDLIX")
-		String mhdisl_POPN = MHDISL10.get("URPOPN")
-		int mhdisl_ALWT = MHDISL10.get("URALWT")
-		String mhdisl_ALWQ = MHDISL10.get("URALWQ")
+		long mhdisl_DLIX = MHDISL10.get("URDLIX");
+		String str_mhdisl_DLIX = MHDISL10.get("URDLIX");
+		String mhdisl_POPN = MHDISL10.get("URPOPN");
+		int mhdisl_ALWT = MHDISL10.get("URALWT");
+		String mhdisl_ALWQ = MHDISL10.get("URALWQ");
 		logger.debug("XtendM3Debug_UpdateMHDISL closure orderConnectedDLIX  " + str_mhdisl_DLIX);
-		//		 if (mhdisl_POPN != ooline_POPN
-		//		 ||  mhdisl_ALWT != ooline_ALWT
-		//		 ||  mhdisl_ALWQ != ooline_ALWQ) {
 		maintainTabDLIX("add", mhdisl_DLIX);
-		//		 }
 	}
 
 	//*****************************************************
@@ -344,25 +340,4 @@ public class UpdateMHDISL extends ExtendM3Transaction {
 		lockedResult.set("URCHID", program.getUser());
 		lockedResult.update();
 	}
-
-	//	  public double isDouble(String stringValue) {
-	//		  double returnValue = 0d
-	//		  try {
-	//			  returnValue = Double.parseDouble(stringValue);
-	//		  } catch (NumberFormatException e) {
-	//			  returnValue = -1d
-	//		  }
-	//		  return returnValue
-	//	  }
-
-	//	public int isInteger(String stringValue) {
-	//		int returnValue = 0
-	//		try {
-	//			returnValue = stringValue.trim() as int;
-	//		} catch (NumberFormatException e) {
-	//			returnValue = errorInt;
-	//		}
-	//		return returnValue
-	//	}
-
 }
