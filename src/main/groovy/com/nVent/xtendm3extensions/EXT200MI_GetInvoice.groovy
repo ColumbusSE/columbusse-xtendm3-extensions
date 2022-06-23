@@ -7,6 +7,12 @@
 // Transaction GetInvoice
 // 
 
+//**************************************************************************** 
+// Date    Version     Developer 
+// 220510  1.0         Jessica Bjorklund, Columbus   New API transaction
+// 220622  2.0         Jessica Bjorklund, Columbus   Added DTP5 and RGDT to output
+//**************************************************************************** 
+
 import java.time.LocalDateTime;  
 import java.time.format.DateTimeFormatter;
 
@@ -40,6 +46,8 @@ public class GetInvoice extends ExtendM3Transaction {
   public String outTECX
   public String outTECZ
   public String outCDAM
+  public String outDTP5
+  public String outRGDT
   
   public Integer CONO
   public String DIVI
@@ -295,6 +303,8 @@ public class GetInvoice extends ExtendM3Transaction {
     mi.outData.put("TECD", outTECD)
     mi.outData.put("TECX", outTECX)
     mi.outData.put("TECZ", outTECZ)
+    mi.outData.put("DTP5", outDTP5)
+    mi.outData.put("RGDT", outRGDT)
   } 
 
    
@@ -312,7 +322,7 @@ public class GetInvoice extends ExtendM3Transaction {
      DBAction actionline = database.table("FSLEDG")
      .index("39")
      .matching(expression)
-     .selection("ESCONO", "ESDIVI", "ESCINO", "ESYEA4", "ESPYNO", "ESCUNO", "ESCUCD", "ESCUAM", "ESRECO", "ESTRCD", "ESIVDT", "ESDUDT", "ESINYR", "ESTEPY", "ESARAT", "ESACDT")
+     .selection("ESCONO", "ESDIVI", "ESCINO", "ESYEA4", "ESPYNO", "ESCUNO", "ESCUCD", "ESCUAM", "ESRECO", "ESTRCD", "ESIVDT", "ESDUDT", "ESINYR", "ESTEPY", "ESARAT", "ESACDT", "ESDTP5", "ESRGDT")
      .build()
 
      DBContainer line = actionline.getContainer()  
@@ -336,7 +346,7 @@ public class GetInvoice extends ExtendM3Transaction {
   Closure<?> releasedLineProcessor = { DBContainer line -> 
 
     TRCD = String.valueOf(line.get("ESTRCD"))
-    
+      
     if (TRCD == "10") {
       // Output selectAllFields 
       outCONO = String.valueOf(line.get("ESCONO")) 
@@ -444,6 +454,15 @@ public class GetInvoice extends ExtendM3Transaction {
       }   
 
     }
+    
+    outDTP5 = ""
+    outRGDT = ""      
+    
+    if (TRCD == "20") {
+      outDTP5 = String.valueOf(line.get("ESDTP5"))   
+      outRGDT = String.valueOf(line.get("ESRGDT"))       
+    }
+    
     CUAM10 = 0
     CUAM20 = 0
     //Calculate left of invoice amount

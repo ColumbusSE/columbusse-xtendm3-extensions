@@ -7,6 +7,13 @@
 // Transaction GetPayments
 // 
 
+//**************************************************************************** 
+// Date    Version     Developer 
+// 220430  1.0         Jessica Bjorklund, Columbus   New API transaction
+// 220622  2.0         Jessica Bjorklund, Columbus   Change of logic for PYDT, use index 26 instead of 20
+//**************************************************************************** 
+
+
 import java.time.LocalDateTime;  
 import java.time.format.DateTimeFormatter;
 
@@ -168,21 +175,25 @@ public class GetPayments extends ExtendM3Transaction {
      // List all Invoices with TRCD = 20
      ExpressionFactory expression = database.getExpressionFactory("FSLEDG")
    
-     expression = expression.eq("ESTRCD", String.valueOf(20))
+     expression = expression.eq("ESTRCD", String.valueOf(20)).and(expression.eq("ESDIVI", DIVI))
      
-     // List invoices with TRCD = 20
-     DBAction actionlinePYDT = database.table("FSLEDG").index("20").matching(expression).selection("ESCONO", "ESDIVI", "ESPYNO", "ESCUNO", "ESDTP5", "ESCUAM", "ESCUCD").build()
+     // List invoices 
+     DBAction actionlinePYDT = database.table("FSLEDG").index("26")
+     .matching(expression)
+     .selection("ESCONO", "ESDIVI", "ESPYNO", "ESCUNO", "ESDTP5", "ESCUAM", "ESCUCD")
+     .reverse()
+     .build()
 
      DBContainer linePYDT = actionlinePYDT.getContainer()  
      
      // Read  
      linePYDT.set("ESCONO", CONO)  
-     linePYDT.set("ESDIVI", DIVI)
      linePYDT.set("ESPYNO", PYNO)
+     linePYDT.set("ESDTP5", 99999999)
      
      int pageSize = mi.getMaxRecords() <= 0 ? 1000 : mi.getMaxRecords()           
 
-     actionlinePYDT.readAll(linePYDT, 3, pageSize, releasedLineProcessorPYDT)   
+     actionlinePYDT.readAll(linePYDT, 2, pageSize, releasedLineProcessorPYDT)   
    
    } 
 
@@ -193,12 +204,12 @@ public class GetPayments extends ExtendM3Transaction {
   Closure<?> releasedLineProcessorPYDT = { DBContainer linePYDT ->     
     
     //Find Last Payment Date
-    PYDT = linePYDT.get("ESDTP5")
-    if (PYDT > lastPYDT) {
-      lastPYDT = PYDT
+    if (lastPYDT == 0) {
+      PYDT = linePYDT.get("ESDTP5")
+      lastPYDT = linePYDT.get("ESDTP5")
+      CUNO = ""
+      CUNO = linePYDT.get("ESCUNO")
     }
-    CUNO = ""
-    CUNO = linePYDT.get("ESCUNO")
        
   }
   
