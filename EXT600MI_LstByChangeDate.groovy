@@ -6,6 +6,13 @@
 // This API transacation LstByChangeDate is used to send data to PriceFX from M3 
 //
 
+//**************************************************************************** 
+// Date    Version     Developer 
+// 210612  1.0         Jessica Bjorklund, Columbus   New API transaction
+// 220620  2.0         Jessica Bjorklund, Columbus   Added PYNO to output
+//**************************************************************************** 
+
+
 import java.math.RoundingMode 
 import java.math.BigDecimal
 import java.lang.Math
@@ -52,19 +59,20 @@ public class LstByChangeDate extends ExtendM3Transaction {
   public int inCONO
   public int inLMDT 
   public long attributeNumber
-  public double discount1                //A 20220127
-  public double discount2                //A 20220127
-  public double discount3                //A 20220127
-  public double discount4                //A 20220127
-  public double discount5                //A 20220127
-  public double discount6                //A 20220127
-  public double discountSum              //A 20220127
-  public String invoiceNumberString   //A 20220127
-  public String extInvoiceNumber      //A 20220127
-  public String invoicePrefix         //A 20220127
-  public String invCharge             //A 20220127
-  public String invReference          //A 20220127
-  public String informationType       //A 20220127
+  public double discount1                
+  public double discount2                
+  public double discount3                
+  public double discount4                
+  public double discount5                
+  public double discount6                
+  public double discountSum             
+  public String invoiceNumberString   
+  public String extInvoiceNumber      
+  public String invoicePrefix         
+  public String invCharge             
+  public String invReference          
+  public String informationType       
+  public String payer                 
 
 
   // Definition of output fields
@@ -111,13 +119,14 @@ public class LstByChangeDate extends ExtendM3Transaction {
   public String outLOCD
   public String outATAV
   public String outYEA4
-  public String outPONR   //A 20220127
-  public String outDISC   //A 20220127
-  public String outDISM   //A 20220127
-  public String outCHGH   //A 20220127
-  public String outCHGF   //A 20220127
-  public String outCHGO   //A 20220127
-  public String outAGNH   //A 20220214
+  public String outPONR   
+  public String outDISC   
+  public String outDISM   
+  public String outCHGH   
+  public String outCHGF   
+  public String outCHGO   
+  public String outAGNH   
+  public String outPYNO   
 
 
   // Constructor 
@@ -163,7 +172,7 @@ public class LstByChangeDate extends ExtendM3Transaction {
   // Get Order Delivery Header Info ODHEAD
   //******************************************************************** 
   private Optional<DBContainer> findODHEAD(Integer CONO, String ORNO, String WHLO, Integer DLIX, String TEPY){  
-    DBAction query = database.table("ODHEAD").index("00").selection("UACONO", "UAORNO", "UACUNO", "UADLIX", "UAWHLO", "UAIVNO", "UAIVDT", "UACUNO", "UACUCD", "UATEPY", "UAORST", "UAYEA4", "UATEDL", "UAINPX", "UADIVI").build()    //C 20220202
+    DBAction query = database.table("ODHEAD").index("00").selection("UACONO", "UAORNO", "UACUNO", "UADLIX", "UAWHLO", "UAIVNO", "UAIVDT", "UACUNO", "UACUCD", "UATEPY", "UAORST", "UAYEA4", "UATEDL", "UAINPX", "UADIVI", "UAPYNO").build()    
     def ODHEAD = query.getContainer()
     ODHEAD.set("UACONO", CONO)
     ODHEAD.set("UAORNO", ORNO)
@@ -370,7 +379,7 @@ public class LstByChangeDate extends ExtendM3Transaction {
 
 
    //***************************************************************************** 
-   // Get calculated info from the del order line using OIS350MI.LstInvLineByTyp     //A 20220127
+   // Get calculated info from the del order line using OIS350MI.LstInvLineByTyp    
    // Input 
    // Company
    // Division
@@ -577,13 +586,14 @@ public class LstByChangeDate extends ExtendM3Transaction {
     mi.outData.put("IVDT", outIVDT)
     mi.outData.put("TEDL", outTEDL)
     mi.outData.put("TEL1", outTEL1)
-    mi.outData.put("PONR", outPONR)    //A 20220127
-    mi.outData.put("DISC", outDISC)    //A 20220127
-    mi.outData.put("DISM", outDISM)    //A 20220127
-    mi.outData.put("CHGH", outCHGH)    //A 20220127
-    mi.outData.put("CHGF", outCHGF)    //A 20220127
-    mi.outData.put("CHGO", outCHGO)    //A 20220127
-    mi.outData.put("AGNH", outAGNH)    //A 20220214
+    mi.outData.put("PONR", outPONR)    
+    mi.outData.put("DISC", outDISC)    
+    mi.outData.put("DISM", outDISM)    
+    mi.outData.put("CHGH", outCHGH)    
+    mi.outData.put("CHGF", outCHGF)    
+    mi.outData.put("CHGO", outCHGO)    
+    mi.outData.put("AGNH", outAGNH)    
+    mi.outData.put("PYNO", outPYNO)    
   } 
     
   //******************************************************************** 
@@ -598,14 +608,14 @@ public class LstByChangeDate extends ExtendM3Transaction {
      expression = expression.eq("UBLMDT", String.valueOf(inLMDT))
 
      // List Invoice Delivery Lines   
-     DBAction actionline = database.table("ODLINE").index("00").matching(expression).selection("UBCONO", "UBLMDT", "UBORNO", "UBPONR", "UBPOSX", "UBWHLO", "UBTEPY", "UBIVNO", "UBITNO", "UBLTYP", "UBSPUN", "UBSAPR", "UBNEPR", "UBLNAM", "UBDCOS", "UBDIP1", "UBDIP2", "UBDIP3", "UBDIP4", "UBDIP5", "UBDIP6", "UBEXIN", "UBINPX").build()     //C 20220202
+     DBAction actionline = database.table("ODLINE").index("00").matching(expression).selection("UBCONO", "UBLMDT", "UBORNO", "UBPONR", "UBPOSX", "UBWHLO", "UBTEPY", "UBIVNO", "UBITNO", "UBLTYP", "UBSPUN", "UBSAPR", "UBNEPR", "UBLNAM", "UBDCOS", "UBDIP1", "UBDIP2", "UBDIP3", "UBDIP4", "UBDIP5", "UBDIP6", "UBEXIN", "UBINPX").build()     
 
      DBContainer line = actionline.getContainer()  
      
      // Read with one key  
      line.set("UBCONO", CONO)  
      
-     int pageSize = mi.getMaxRecords() <= 0 ? 1000 : mi.getMaxRecords()           //A 20220112
+     int pageSize = mi.getMaxRecords() <= 0 ? 1000 : mi.getMaxRecords()           
 
      actionline.readAll(line, 1, pageSize, releasedLineProcessor)   
    
@@ -621,7 +631,7 @@ public class LstByChangeDate extends ExtendM3Transaction {
   company = line.get("UBCONO")
   deliveryNumber = line.get("UBDLIX") 
   invoiceNumber = line.get("UBIVNO") 
-  invoiceNumberString = line.get("UBIVNO")    //A 20220127
+  invoiceNumberString = line.get("UBIVNO")    
   orderNumber = line.get("UBORNO")
   orderLine = line.get("UBPONR")
   orderLineSuffix = line.get("UBPOSX")
@@ -633,13 +643,13 @@ public class LstByChangeDate extends ExtendM3Transaction {
   salesPrice = line.get("UBSAPR")
   netPrice = line.get("UBNEPR")
   lineAmount = line.get("UBLNAM")
-  extInvoiceNumber = line.get("UBEXIN")  //A 20220127
-  discount1 = line.get("UBDIP1")     //A 20220127
-  discount2 = line.get("UBDIP2")     //A 20220127
-  discount3 = line.get("UBDIP3")     //A 20220127
-  discount4 = line.get("UBDIP4")     //A 20220127
-  discount5 = line.get("UBDIP5")     //A 20220127
-  discount6 = line.get("UBDIP6")     //A 20220127
+  extInvoiceNumber = line.get("UBEXIN")  
+  discount1 = line.get("UBDIP1")     
+  discount2 = line.get("UBDIP2")     
+  discount3 = line.get("UBDIP3")     
+  discount4 = line.get("UBDIP4")     
+  discount5 = line.get("UBDIP5")     
+  discount6 = line.get("UBDIP6")    
   
   logger.info("discount1 = ${discount1}")
   logger.info("discount2 = ${discount2}")
@@ -649,8 +659,8 @@ public class LstByChangeDate extends ExtendM3Transaction {
   logger.info("discount6 = ${discount6}")
   
   //Sum of discounts
-  discountSum = 0                                                              //A 20220127
-  discountSum = discount1 + discount2 + discount3 + discount5 + discount6      //A 20220127
+  discountSum = 0                                                              
+  discountSum = discount1 + discount2 + discount3 + discount5 + discount6      
   
   // Get Sent flag from EXTPFX 
   Optional<DBContainer> EXTPFX = findEXTPFX(company, orderNumber, orderLine, orderLineSuffix, deliveryNumber, warehouse, paymentTerms)
@@ -679,7 +689,8 @@ public class LstByChangeDate extends ExtendM3Transaction {
     deliveryTerms = containerODHEAD.getString("UATEDL")  
     invoiceDate = String.valueOf(containerODHEAD.get("UAIVDT"))  
     year = String.valueOf(containerODHEAD.get("UAYEA4")) 
-    invoicePrefix = containerODHEAD.get("UAINPX")                   //A 20220127
+    invoicePrefix = containerODHEAD.get("UAINPX")                   
+    payer = containerODHEAD.get("UAPYNO")                           
 
   } 
   
@@ -702,8 +713,9 @@ public class LstByChangeDate extends ExtendM3Transaction {
         outTEDL = deliveryTerms
         outIVDT = invoiceDate
         outYEA4 = year
-        outDISC = discountSum   //A 20220127
-        outDISM = discount4     //A 20220127
+        outDISC = discountSum   
+        outDISM = discount4     
+        outPYNO = payer         
         
         // Get Order Head Info 
         Optional<DBContainer> OOHEAD = findOOHEAD(company, orderNumber)
@@ -715,7 +727,7 @@ public class LstByChangeDate extends ExtendM3Transaction {
           outORTP = containerOOHEAD.getString("OAORTP")   
           outWCON = containerOOHEAD.getString("OAWCON")   
           outORNO = containerOOHEAD.getString("OAORNO")  
-          outAGNH = containerOOHEAD.getString("OAAGNO")         //20220214 
+          outAGNH = containerOOHEAD.getString("OAAGNO")         
           languageCode = containerOOHEAD.getString("OALNCD")   
         } else {
           outORDT = ""
@@ -796,13 +808,13 @@ public class LstByChangeDate extends ExtendM3Transaction {
         invCharge = 0
         outCHGH = ""
         informationType = "65"
-        getInvoiceCharges(companyString, division, year, invoiceNumberString, informationType, invoicePrefix, extInvoiceNumber)    //A 20220127
+        getInvoiceCharges(companyString, division, year, invoiceNumberString, informationType, invoicePrefix, extInvoiceNumber)    
         outCHGH = invCharge
         
         invCharge = 0
         outCHGF = ""
         informationType = "60"
-        getInvoiceCharges(companyString, division, year, invoiceNumberString, informationType, invoicePrefix, extInvoiceNumber)    //A 20220127
+        getInvoiceCharges(companyString, division, year, invoiceNumberString, informationType, invoicePrefix, extInvoiceNumber)    
         if (invReference != null) {
           if (invReference.startsWith("F")) {
             outCHGF = invCharge
@@ -812,7 +824,7 @@ public class LstByChangeDate extends ExtendM3Transaction {
         invCharge = 0
         outCHGO = ""
         informationType = "60"
-        getInvoiceCharges(companyString, division, year, invoiceNumberString, informationType, invoicePrefix, extInvoiceNumber)    //A 20220127
+        getInvoiceCharges(companyString, division, year, invoiceNumberString, informationType, invoicePrefix, extInvoiceNumber)    
         if (invReference != null) {
           if (!invReference.startsWith("F")) {
             outCHGO = invCharge
