@@ -6,6 +6,13 @@
 // This API transacation LstByChangeDate is used to send data to PriceFX from M3 
 //
 
+//**************************************************************************** 
+// Date    Version     Developer 
+// 210612  1.0         Jessica Bjorklund, Columbus   New API transaction
+// 220620  2.0         Jessica Bjorklund, Columbus   Added PYNO to output
+//**************************************************************************** 
+
+
 import java.math.RoundingMode 
 import java.math.BigDecimal
 import java.lang.Math
