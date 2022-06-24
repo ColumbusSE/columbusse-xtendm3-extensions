@@ -650,14 +650,7 @@ public class LstByChangeDate extends ExtendM3Transaction {
   discount4 = line.get("UBDIP4")     
   discount5 = line.get("UBDIP5")     
   discount6 = line.get("UBDIP6")    
-  
-  logger.info("discount1 = ${discount1}")
-  logger.info("discount2 = ${discount2}")
-  logger.info("discount3 = ${discount3}")
-  logger.info("discount4 = ${discount4}")
-  logger.info("discount5 = ${discount5}")
-  logger.info("discount6 = ${discount6}")
-  
+
   //Sum of discounts
   discountSum = 0                                                              
   discountSum = discount1 + discount2 + discount3 + discount5 + discount6      
