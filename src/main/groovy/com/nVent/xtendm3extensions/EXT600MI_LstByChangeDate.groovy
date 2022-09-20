@@ -6,11 +6,12 @@
 // This API transacation LstByChangeDate is used to send data to PriceFX from M3 
 //
 
-//**************************************************************************** 
+//************************************************************************************ 
 // Date    Version     Developer 
 // 210612  1.0         Jessica Bjorklund, Columbus   New API transaction
 // 220620  2.0         Jessica Bjorklund, Columbus   Added PYNO to output
-//**************************************************************************** 
+// 220820  3.0         Jessica Bjorklund, Columbus   Change delivery address type from 1 to 2 when call to MWS410MI
+//************************************************************************************ 
 
 
 import java.math.RoundingMode 
@@ -291,7 +292,7 @@ public class LstByChangeDate extends ExtendM3Transaction {
    // Address Type
    //***************************************************************************** 
    private getDeliveryAddress(String company, String deliveryNumber, String AddressType){   
-        def params = [CONO: companyString, DLIX: deliveryNumberString, ADRT: "01"] 
+        def params = [CONO: companyString, DLIX: deliveryNumberString, ADRT: "02"] 
         String name = null
         String town = null
         String country = null
