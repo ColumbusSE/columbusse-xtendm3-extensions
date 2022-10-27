@@ -13,20 +13,20 @@ import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 
 public class UpdDelivBlock extends ExtendM3Transaction {
-  private final MIAPI mi; 
-  private final DatabaseAPI database; 
-  private final ProgramAPI program;
-  private final LoggerAPI logger; 
+  private final MIAPI mi 
+  private final DatabaseAPI database 
+  private final ProgramAPI program
+  private final LoggerAPI logger 
   
     // Definition 
   public int inBLOP 
   public String status
   
   public UpdDelivBlock(MIAPI mi, DatabaseAPI database, ProgramAPI program, LoggerAPI logger) {
-     this.mi = mi;
-     this.database = database; 
-     this.program = program;
-     this.logger = logger; 
+     this.mi = mi
+     this.database = database 
+     this.program = program
+     this.logger = logger 
   } 
     
   public void main() { 
@@ -125,9 +125,9 @@ public class UpdDelivBlock extends ExtendM3Transaction {
    
      Closure<?> updateCallBackMHDISH = { LockedResult lockedResult -> 
       // Get todays date
-     LocalDateTime now = LocalDateTime.now();    
-     DateTimeFormatter format1 = DateTimeFormatter.ofPattern("yyyyMMdd");  
-     String formatDate = now.format(format1);    
+     LocalDateTime now = LocalDateTime.now()    
+     DateTimeFormatter format1 = DateTimeFormatter.ofPattern("yyyyMMdd")  
+     String formatDate = now.format(format1)    
      
      int changeNo = lockedResult.get("OQCHNO")
      int newChangeNo = changeNo + 1 
@@ -135,7 +135,7 @@ public class UpdDelivBlock extends ExtendM3Transaction {
      lockedResult.set("OQBLOP", inBLOP) 
         
      // Update changed information
-     int changeddate=Integer.parseInt(formatDate);   
+     int changeddate=Integer.parseInt(formatDate)   
      lockedResult.set("OQLMDT", changeddate)  
       
      lockedResult.set("OQCHNO", newChangeNo) 
