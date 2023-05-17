@@ -5,7 +5,7 @@
  *
  *  @author    Frank Zahlten (frank.zahlten@columbusglobal.com)
  *  @date      2023-02-13
- *  @version   1.0
+ *  @version   1.1
  *
  *  1.0
  *  2.0  2023-02-23   Frank Zahlten  get integer value directly from mi.in
@@ -27,7 +27,6 @@ public class AddPurLineAcc extends ExtendM3Transaction {
 
 	private static final DecimalFormat df = new DecimalFormat("0.00");
 
-	private String iCono = "";
 	private int intCono = 0;
 	private String iPuno = "";
 	private String iPnli = "";
@@ -86,8 +85,7 @@ public class AddPurLineAcc extends ExtendM3Transaction {
 	}
 
 	public void main() {
-		iCono = program.LDAZD.get("CONO");
-		intCono = Integer.parseInt(iCono);
+		intCono = program.LDAZD.get("CONO");
 		iPuno = mi.in.get("PUNO");
 		iPnli = mi.in.get("PNLI");
 		iPnls = mi.in.get("PNLS");
@@ -106,7 +104,7 @@ public class AddPurLineAcc extends ExtendM3Transaction {
 			return;
 		}
 
-		logger.debug("EXT201MI/AddPurLineAcc input field CONO : " + iCono
+		logger.debug("EXT201MI/AddPurLineAcc input field CONO : " + intCono.toString()
 				+ " PUNO " + iPuno
 				+ " PNLI " + iPnli
 				+ " PNLS " + iPnls
@@ -292,7 +290,7 @@ public class AddPurLineAcc extends ExtendM3Transaction {
 	 * validateMPHEAD - Validate given purchase order header
 	 *
 	 * Input    PUNO - from Input
-	 * Output   false, if MPHEAD is not existing 
+	 * Output   false, if MPHEAD is not existing
 	 *          DIVI - from MPHEAD
 	 *          DWDT - from MPHEAD
 	 *          ORTY - from MPHEAD
@@ -649,7 +647,7 @@ public class AddPurLineAcc extends ExtendM3Transaction {
 	 */
 	 private void createOutput() {
 		 logger.debug("XEXT201MI/ADD createOutput");
-		 mi.outData.put("CONO", iCono);
+		 mi.outData.put("CONO", intCono.toString());
 		 mi.outData.put("RIDN", crs935Ridn);
 		 mi.outData.put("RIDL", crs935Ridl.toString());
 		 mi.outData.put("RIDX", crs935Ridx.toString());
