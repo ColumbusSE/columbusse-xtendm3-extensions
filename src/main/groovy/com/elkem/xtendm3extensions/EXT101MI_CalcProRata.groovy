@@ -5,7 +5,7 @@
  *
  *  @author    Frank Zahlten (frank.zahlten@columbusglobal.com)
  *  @date      2023-02-22
- *  @version   1.0
+ *  @version   1.1
  */
 
 import java.time.LocalDateTime;
@@ -28,7 +28,6 @@ public class CalcProRata extends ExtendM3Transaction {
 	private static final DecimalFormat df5 = new DecimalFormat("0.00000");
 	private static final DecimalFormat df6 = new DecimalFormat("0.000000");
 
-	private String iCono = "";
 	private int intCono = 0;
 	private String iOrno = "";
 	private String iPonr = "";
@@ -91,13 +90,14 @@ public class CalcProRata extends ExtendM3Transaction {
 
 	public void main() {
 
-		iCono =  program.LDAZD.get("CONO");
+		intCono = program.LDAZD.get("CONO");
+		
 		iOrno =  mi.in.get("ORNO");
 		iPonr =  mi.in.get("PONR");
 		iPosx =  mi.in.get("POSX");
 		iTtyp =  mi.in.get("TTYP");
 
-		logger.debug("EXT101MI/CalcProRata input field CONO : " + iCono);
+		logger.debug("EXT101MI/CalcProRata input field CONO : " + intCono.toString());
 		logger.debug("EXT101MI/CalcProRata input field ORNO : " + iOrno);
 		logger.debug("EXT101MI/CalcProRata input field PONR : " + iPonr);
 		logger.debug("EXT101MI/CalcProRata input field POSX : " + iPosx);
@@ -147,26 +147,13 @@ public class CalcProRata extends ExtendM3Transaction {
 		iTtyp.trim();
 		if (iTtyp != "") {
 			intTtyp = mi.in.get("TTYP");
-		    if (intTtyp != constTTYP){
+			if (intTtyp != constTTYP){
 				mi.error("Transaction type " + iTtyp + " is not valid");
 				foundError = true;
 				return false;
-		    }
+			}
 		}
 		
-
-		//check CONO
-		if (iCono == null) {
-			mi.error("Company " + iCono + " is not valid");
-			foundError = true;
-			return false;
-		}
-		if(validateCompany(iCono)){
-			mi.error("Company " + iCono + " is invalid");
-			foundError = true;
-			return false;
-		}
-		intCono = program.LDAZD.get("CONO");
 
 		//check ARTN Artikelnummer
 		if (iOrno == null) {
@@ -224,22 +211,6 @@ public class CalcProRata extends ExtendM3Transaction {
 		//all checks are done and ok
 		return true;
 	}
-
-	/**
-	 * validateCompany - Validate given or retrieved CONO
-	 * Input
-	 * Company - from Input
-	 */
-	boolean validateCompany(String company){
-		logger.debug("EXT101MI/CalcProRata validateCompany started! company: " + iCono);
-		// Run MI program
-		def parameter = [CONO: company];
-		List <String> result = [];
-		Closure<?> handler = {Map<String, String> response ->
-			return response.CONO == 0};
-		miCaller.call("MNS095MI", "Get", parameter, handler);
-	}
-
 
 	/**
 	 *   readEXTZLN - read a record for given key values
@@ -318,7 +289,7 @@ public class CalcProRata extends ExtendM3Transaction {
 	}
 	
 	/**
-	 *   readOOLINE - read record for given key values
+	 *   readOOHEAD - read record for given key values
 	 */
 	private Optional<DBContainer> readOOHEAD() {
 		logger.debug("EXT101MI/CalcProRata readOOLINE Start");
@@ -347,7 +318,15 @@ public class CalcProRata extends ExtendM3Transaction {
 	}
 
 	/**
-	 *   sumUpAllocationResults -
+	 * sumUpAllocationResults
+	 * 
+	 * read all MITALO data, count the records and sum up allocated qauntity   
+	 * use QMSRQT data of the called closure for a validation of existing QMS data per
+	 * MITALO record.
+	 *  
+	 * Result will be the new price, which is in relation to the result of the concrete 
+	 * QMS activity per MITALO quantity and not based on an theortical average result, as
+	 * used when entering a new customer order postion.
 	 */
 	boolean sumUpAllocationResults() {
 		logger.debug("EXT101MI/CalcProRata sumUpAllocationResults started");
@@ -359,9 +338,9 @@ public class CalcProRata extends ExtendM3Transaction {
 
 		DBAction action_MITALO = database.table("MITALO")
 				.index("20")
-				.selectAllFields()
+				.selection("MQRIDL", "MQRIDX", "MQITNO", "MQBANO", "MQALQT")
 				.build();
-		DBContainer MITALO = action_MITALO.getContainer()
+		DBContainer MITALO = action_MITALO.getContainer();
 
 		MITALO.set("MQCONO", intCono);
 		MITALO.set("MQTTYP", constTTYP);
@@ -588,10 +567,10 @@ public class CalcProRata extends ExtendM3Transaction {
 	 * Company - from Input
 	 */
 	boolean updatePriceOOLINE(){
-		logger.debug("EXT101MI/CalcProRata updatPriceOOLINE started! company: " + iCono);
+		logger.debug("EXT101MI/CalcProRata updatPriceOOLINE started! company: " + intCono.toString());
 		// Run MI program
 		def parameter = [
-				  "CONO": iCono,
+				  "CONO": intCono.toString(),
 				  "ORNO": iOrno,
 				  "PONR": iPonr,
 				  "POSX": iPosx,
