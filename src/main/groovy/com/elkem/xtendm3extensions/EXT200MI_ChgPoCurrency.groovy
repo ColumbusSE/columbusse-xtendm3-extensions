@@ -4,7 +4,7 @@
  *
  *  @author    Frank Zahlten (frank.zahlten@columbusglobal.com)
  *  @date      2023-02-13
- *  @version   1.0
+ *  @version   1.1
  */
 
 import java.time.LocalDateTime;
@@ -23,7 +23,6 @@ public class ChgPoCurrency extends ExtendM3Transaction {
 	private static final DecimalFormat df = new DecimalFormat("0.00");
 	private String date;
 	private String time;
-	private String iCono = "";
 	private int intCono = 0;
 	private String iPuno = "";
 	private String iCucd = "";
@@ -38,8 +37,7 @@ public class ChgPoCurrency extends ExtendM3Transaction {
 	}
 
 	public void main() {
-		iCono = program.LDAZD.get("CONO");
-		intCono = Integer.parseInt(iCono);
+		intCono = program.LDAZD.get("CONO");
 		iPuno = mi.in.get("PUNO");
 		iCucd = mi.in.get("CUCD");
 
@@ -93,13 +91,13 @@ public class ChgPoCurrency extends ExtendM3Transaction {
 		return true;
 	}
 	
-	/** 
+	/**
 	 * validatePuno
-	 * 
+	 *
 	 * Input
 	 *  Company - from Input
 	 *  purchase order no - from Input
-	 *  
+	 *
 	 *  saved information for later use
 	 *  mphead_CUCD
 	 */
@@ -109,7 +107,7 @@ public class ChgPoCurrency extends ExtendM3Transaction {
 				 .selection("IACUCD")
 				 .build();
 		 DBContainer PHEAD = action_MPHEAD.createContainer();
-		 logger.debug("validatePuno CONO " + iCono);
+		 logger.debug("validatePuno CONO " + intCono.toString());
 		 logger.debug("validatePuno PUNO " + iPuno);
 		 PHEAD.set("IACONO", intCono);
 		 PHEAD.set("IAPUNO", iPuno);
@@ -152,7 +150,7 @@ public class ChgPoCurrency extends ExtendM3Transaction {
 	 * do the update on the MPHEAD record after locking of the record
 	 */
 	void updateMPHEAD() {
-		logger.debug("EXT200MI/ChgPoCurrency updateMPHEAD started! company: " + iCono);
+		logger.debug("EXT200MI/ChgPoCurrency updateMPHEAD started! company: " + intCono.toString());
 		DBAction query = database.table("MPHEAD")
 				.index("00")
 				.selection("IACHNO")
