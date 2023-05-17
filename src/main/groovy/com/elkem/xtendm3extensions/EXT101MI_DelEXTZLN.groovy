@@ -5,7 +5,7 @@
  *
  *  @author    Frank Zahlten (frank.zahlten@columbusglobal.com)
  *  @date      2023-03-16
- *  @version   1.0
+ *  @version   1.1
  */
 import M3.DBContainer;
 
@@ -16,7 +16,6 @@ public class DelEXTZLN extends ExtendM3Transaction {
 	private final ProgramAPI program;
 	private final LoggerAPI logger;
 
-	private String iCono = "";
 	private int intCono = 0;
 	private String iOrno = "";
 	private String iPonr = "";
@@ -34,13 +33,13 @@ public class DelEXTZLN extends ExtendM3Transaction {
 
 	public void main() {
 
-		iCono =  program.LDAZD.get("CONO");
+		intCono =  program.LDAZD.get("CONO");
 		iOrno =  mi.in.get("ORNO");
 		iPonr =  mi.in.get("PONR");
 		iPosx =  mi.in.get("POSX");
 
 
-		logger.debug("EXT101MI/DelEXTZLN input field CONO : " + iCono);
+		logger.debug("EXT101MI/DelEXTZLN input field CONO : " + intCono.toString());
 		logger.debug("EXT101MI/DelEXTZLN input field ORNO : " + iOrno);
 		logger.debug("EXT101MI/DelEXTZLN input field PONR : " + iPonr);
 		logger.debug("EXT101MI/DelEXTZLN input field POSX : " + iPosx);
@@ -61,17 +60,7 @@ public class DelEXTZLN extends ExtendM3Transaction {
 	 */
 	boolean validateInput() {
 		logger.debug("EXT101MI/DelEXTZLN validateInput started");
-		//check CONO
-		if (iCono == null) {
-			mi.error("Company " + iCono + " is not valid");
-			return false;
-		}
-		if(validateCompany(iCono)){
-			mi.error("Company " + iCono + " is invalid");
-			return false;
-		}
-		intCono = program.LDAZD.get("CONO");
-
+	
 		//check ARTN Artikelnummer
 		if (iOrno == null) {
 			iOrno = "";
@@ -116,31 +105,16 @@ public class DelEXTZLN extends ExtendM3Transaction {
 	}
 
 	/**
-	 * validateCompany - Validate given or retrieved CONO
-	 * Input
-	 * Company - from Input
-	 */
-	boolean validateCompany(String company){
-		logger.debug("EXT101MI/DelEXTZLN validateCompany started! company: " + iCono);
-		// Run MI program
-		def parameter = [CONO: company];
-		List <String> result = [];
-		Closure<?> handler = {Map<String, String> response ->
-			return response.CONO == 0};
-		miCaller.call("MNS095MI", "Get", parameter, handler);
-	}
-
-	/**
 	 * get order position
-	 * 
+	 *
 	 * Input
 	 * Company - from LDA
 	 * order no - from Input
 	 * order position - from Input
 	 * order position suffix- from Input
-	 * 
+	 *
 	 * Output
-	 * boolean value for existence of the record 
+	 * boolean value for existence of the record
 	 */
 
 	boolean checkEXTZLN(int cono, String orno, int ponr, int posx){
@@ -164,7 +138,7 @@ public class DelEXTZLN extends ExtendM3Transaction {
 
 	/**
 	 * Deletes the record in file EXTCLC
-	 * 
+	 *
 	 * Input
 	 * Company - from LDA
 	 * order no - from Input
