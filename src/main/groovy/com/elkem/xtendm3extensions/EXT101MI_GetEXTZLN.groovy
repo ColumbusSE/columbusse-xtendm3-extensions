@@ -5,7 +5,7 @@
  *
  *  @author    Frank Zahlten (frank.zahlten@columbusglobal.com)
  *  @date      2023-02-17
- *  @version   1.0
+ *  @version   1.1
  */
 
 import java.time.LocalDateTime;
@@ -23,7 +23,6 @@ public class GetEXTZLN extends ExtendM3Transaction {
 	private static final DecimalFormat df2 = new DecimalFormat("0.00");
 	private static final DecimalFormat df6 = new DecimalFormat("0.000000");
 
-	private String iCono = "";
 	private int intCono = 0;
 	private String iOrno = "";
 	private String iPonr = "";
@@ -55,12 +54,12 @@ public class GetEXTZLN extends ExtendM3Transaction {
 
 	public void main() {
 
-		iCono =  program.LDAZD.get("CONO");
+		intCono = program.LDAZD.get("CONO");
 		iOrno =  mi.in.get("ORNO");
 		iPonr =  mi.in.get("PONR");
 		iPosx =  mi.in.get("POSX");
 		
-		logger.debug("EXT101MI/GetEXTZLN input field CONO : " + iCono);
+		logger.debug("EXT101MI/GetEXTZLN input field CONO : " + intCono.toString());
 		logger.debug("EXT101MI/GetEXTZLN input field ORNO : " + iOrno);
 		logger.debug("EXT101MI/GetEXTZLN input field PONR : " + iPonr);
 		logger.debug("EXT101MI/GetEXTZLN input field POSX : " + iPosx);
@@ -87,17 +86,7 @@ public class GetEXTZLN extends ExtendM3Transaction {
 	*/
 	boolean validateInput() {
 		logger.debug("EXT101MI/GetEXTZLN validateInput started");
-		//check CONO
-		if (iCono == null) {
-			mi.error("Company " + iCono + " is not valid");
-			return false;
-		}
-		if(validateCompany(iCono)){
-			mi.error("Company " + iCono + " is invalid");
-			return false;
-		}
-		intCono = program.LDAZD.get("CONO");
-
+		
 		//check ARTN Artikelnummer
 		if (iOrno == null) {
 			iOrno = "";
@@ -142,7 +131,7 @@ public class GetEXTZLN extends ExtendM3Transaction {
 	* Company - from Input
   */
 	boolean validateCompany(String company){
-		logger.debug("EXT101MI/GetEXTZLN validateCompany started! company: " + iCono);
+		logger.debug("EXT101MI/GetEXTZLN validateCompany started! company: " + intCono.toString());
 		// Run MI program
 		def parameter = [CONO: company];
 		List <String> result = [];
