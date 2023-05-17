@@ -5,7 +5,7 @@
  *
  *  @author    Frank Zahlten (frank.zahlten@columbusglobal.com)
  *  @date      2023-02-14
- *  @version   1.0
+ *  @version   1.1
  */
 
 import java.time.LocalDateTime;
@@ -24,7 +24,6 @@ public class ChgDlqaOdline extends ExtendM3Transaction {
 	private List<DBContainer> records = [];
 
 	private final Integer companyNumber;
-	private String iCono;
 	private int intCono;
 	private String iOrno;
 	private String iPonr;
@@ -58,8 +57,7 @@ public class ChgDlqaOdline extends ExtendM3Transaction {
 	}
 
 	void main() {
-		iCono = program.LDAZD.get("CONO");
-		intCono = Integer.parseInt(iCono);
+		intCono = program.LDAZD.get("CONO");
 		iOrno = mi.in.get("ORNO");
 		iPonr = mi.in.get("PONR");
 		iPosx = mi.in.get("POSX");
@@ -108,15 +106,6 @@ public class ChgDlqaOdline extends ExtendM3Transaction {
 	 */
 	boolean validateInput() {
 		logger.debug("EXT422MI_validateInput started");
-		if (iCono == null) {
-			mi.error("Company " + iCono + " is not valid");
-			return false;
-		}
-		
-		if(validateCompany(iCono)){
-			mi.error("Company " + iCono + " is invalid");
-			return false;
-		}
 
 		if (iOrno == null) {
 			iOrno = "";
@@ -178,25 +167,10 @@ public class ChgDlqaOdline extends ExtendM3Transaction {
 	}
 
 	/**
-	 * validateCompany - Validate given or retrieved CONO
-	 * Input
-	 * Company - from Input
-	 */
-	boolean validateCompany(String company){
-		logger.debug("XEXT422MI/ChgdlqaODLINE validateCompany started! company: " + iCono);
-		// Run MI program
-		def parameter = [CONO: company];
-		List <String> result = [];
-		Closure<?> handler = {Map<String, String> response ->
-			return response.CONO == 0};
-		miCaller.call("MNS095MI", "Get", parameter, handler);
-	}
-
-	/**
 	 * do the update on the MWPREL record after locking of the record
 	 */
 	void updateOdline() {
-		logger.debug("XEXT422MI/ChgdlqaODLINE updateOdline started! company: " + iCono);
+		logger.debug("XEXT422MI/ChgdlqaODLINE updateOdline started! company: " + intCono.toString());
 		DBAction query = database.table("ODLINE")
 				.index("00")
 				.selection("UBDLQA")
@@ -224,7 +198,7 @@ public class ChgDlqaOdline extends ExtendM3Transaction {
 		lockedResult.set("UBLMDT", date as int);
 		lockedResult.set("UBCHNO", intChno);
 		lockedResult.set("UBCHID", program.getUser());
-		lockedResult.update();  
+		lockedResult.update();
 	}
 
 	/**
