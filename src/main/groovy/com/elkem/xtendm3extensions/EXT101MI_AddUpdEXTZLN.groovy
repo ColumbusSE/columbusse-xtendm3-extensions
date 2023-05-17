@@ -5,7 +5,7 @@
  *
  *  @author    Frank Zahlten (frank.zahlten@columbusglobal.com)
  *  @date      2023-02-17
- *  @version   1.0
+ *  @version   1.1
  */
 
 import java.time.LocalDateTime;
@@ -23,7 +23,6 @@ public class AddUpdEXTZLN extends ExtendM3Transaction {
 	private static final DecimalFormat df2 = new DecimalFormat("0.00");
 	private static final DecimalFormat df6 = new DecimalFormat("0.000000");
 
-	private String iCono = "";
 	private int intCono = 0;
 	private String iOrno = "";
 	private String iPonr = "";
@@ -57,7 +56,9 @@ public class AddUpdEXTZLN extends ExtendM3Transaction {
 
 	public void main() {
 		logger.debug("EXT101MI.CrtZLN Start main()");
-		iCono = program.LDAZD.get("CONO");
+		
+		intCono = program.LDAZD.get("CONO");
+		
 		iOrno = mi.in.get("ORNO");
 		iPonr = mi.in.get("PONR");
 		iPosx = mi.in.get("POSX");
@@ -67,7 +68,6 @@ public class AddUpdEXTZLN extends ExtendM3Transaction {
 		
 		if (!validateInput()) {
 			logger.debug("EXT101MI.CrtZLN validateInput ended with false!!!!");
-			mi.write();
 			return;
 		}
 
@@ -85,17 +85,7 @@ public class AddUpdEXTZLN extends ExtendM3Transaction {
 	 * validate data from the input
 	 */
 	boolean validateInput() {
-		logger.debug("XEXT101MI/AddUpdEXTZLN validateInput started");
-		//check CONO
-		if (iCono == null) {
-			mi.error("Company " + iCono + " is not valid")
-			return false;
-		}
-		if(validateCompany(iCono)){
-			mi.error("Company " + iCono + " is invalid")
-			return false;
-		}
-		intCono = program.LDAZD.get("CONO");
+		logger.debug("XEXT101MI/AddUpdEXTZLN validateInput started");		
 
 		//check ORNO
 		if (iOrno == null) {
@@ -129,8 +119,15 @@ public class AddUpdEXTZLN extends ExtendM3Transaction {
 		}
 		intPosx = mi.in.get("POSX");
 		
+		//check if customer order line exists
+		Optional<DBContainer> OOLINE = readOOLINE();
+		if(!OOLINE.isPresent()){
+			mi.error("Customer order position doesn't exist");
+			return false;
+		}
+		
 		//check if record already exists
-		Optional<DBContainer> EXTZLN = readEXTZLN()
+		Optional<DBContainer> EXTZLN = readEXTZLN();
 		if(EXTZLN.isPresent()){
 			modeUpdate = true;
 		} else {
@@ -157,7 +154,7 @@ public class AddUpdEXTZLN extends ExtendM3Transaction {
 		}
 		iAcva.trim();
 		if (iAcva == ""){
-			iAcva = "0.00"
+			iAcva = "0.00";
 		}
 		doubleAcva = setDecimals(iAcva, 2);
 		if (decimalError) {
@@ -178,7 +175,7 @@ public class AddUpdEXTZLN extends ExtendM3Transaction {
 		}
 		iSapr.trim();
 		if (iSapr == ""){
-			iSapr = "0.000000"
+			iSapr = "0.000000";
 		}
 		doubleSapr = setDecimals(iSapr, 6) ;
 		if (decimalError) {
@@ -190,27 +187,17 @@ public class AddUpdEXTZLN extends ExtendM3Transaction {
 
 	}
 
+	/**
+	 * initRemaingOutputFields
+	 * 
+	 * initialize remaining output fields, used when adding a new record to EXTZLN  
+	 */
 	public void initRemaingOutputFields() {
 		oAncl = "     ";
 		oTx40 = "                                         ";
 		doubleEvmn = setDecimals("0.0", 6);
 		doubleQtrs = setDecimals("0.0", 6);
 		oStat = "  ";
-	}
-
-	/**
-	 * validateCompany - Validate given or retrieved CONO
-	 * Input
-	 * Company - from Input
-	 */
-	boolean validateCompany(String company){
-		logger.debug("XEXT101MI/AddUpdEXTZLN validateCompany started! company: " + iCono);
-		// Run MI program
-		def parameter = [CONO: company];
-		List <String> result = [];
-		Closure<?> handler = {Map<String, String> response ->
-			return response.CONO == 0};
-		miCaller.call("MNS095MI", "Get", parameter, handler);
 	}
 
 	/**
@@ -227,13 +214,13 @@ public class AddUpdEXTZLN extends ExtendM3Transaction {
 		String strOut = iValue.trim();
 		int lengthOut = strOut.length();
 		logger.debug("XEXT101MI/AddUpdEXTZLN strOut: " + strOut);
-		//String newStrOut = strOut.substring(0, lengthOut - outDecimals) + '.' + strOut.substring(lengthOut - outDecimals);
 		try {
 			doubleVal = Double.parseDouble(strOut);
 		} catch(IOException e) {
 			mi.error("numeric value of " + strOut + " is not valid!" );
 			decimalError = true;
-			return;
+			doubleVal = 0d;
+			return doubleVal;
 		}
 		if (outDecimals == 2) {
 			doubleVal = Double.parseDouble(df2.format(doubleVal));
@@ -265,6 +252,7 @@ public class AddUpdEXTZLN extends ExtendM3Transaction {
 		QMSTTP.set("QTQTST", iQtst);
 		if (!action.readAll(QMSTTP, 02, countRecQMSTTP)) {
 			mi.error("LI Class {$iQtst} does not exist");
+			return false;
 		}
 		if (countQMSTTP != 0) {
 			return true;
@@ -286,7 +274,6 @@ public class AddUpdEXTZLN extends ExtendM3Transaction {
 		logger.debug("XEXT101MI/AddUpdEXTZLN addDbRecord");
 		DBAction action_EXTZLN = database.table("EXTZLN")
 				.index("00")
-				.selectAllFields()
 				.build();
 		DBContainer EXTZLN = action_EXTZLN.createContainer();
 		EXTZLN.set("EXCONO", intCono);
@@ -430,6 +417,38 @@ public class AddUpdEXTZLN extends ExtendM3Transaction {
 			return Optional.of(EXTZLN);
 		}
 		logger.debug("XEXT101MI/AddUpdEXTZLN readEXTZLN record is not existing");
+		return Optional.empty();
+	}
+	
+	/**
+	 * readOOLINE
+	 * get and return a record from file OOLINE
+	 */
+	private Optional<DBContainer> readOOLINE() {
+		logger.debug("XEXT101MI/AddUpdEXTZLN readOOLINE");
+		DBAction action_OOLINE = database.table("OOLINE")
+			.index("00")
+			.selectAllFields()
+			.build();
+		DBContainer OOLINE = action_OOLINE.getContainer();
+
+		logger.debug("XEXT101MI/AddUpdEXTZLN readOOLINE Key OBCONO: " + intCono.toString()
+		+ " OBORNO: " + iOrno
+		+ " OBPONR: " + intPonr.toString()
+		+ " OBPOSX: " + intPosx.toString());
+
+		// Key value for read
+		OOLINE.set("OBCONO", intCono);
+		OOLINE.set("OBORNO", iOrno);
+		OOLINE.set("OBPONR", intPonr);
+		OOLINE.set("OBPOSX", intPosx);
+
+		// Read
+		if (action_OOLINE.read(OOLINE)) {
+			logger.debug("XEXT101MI/AddUpdEXTZLN readOOLINE record is existing");
+			return Optional.of(OOLINE);
+		}
+		logger.debug("XEXT101MI/AddUpdEXTZLN readOOLINE record is not existing");
 		return Optional.empty();
 	}
 
