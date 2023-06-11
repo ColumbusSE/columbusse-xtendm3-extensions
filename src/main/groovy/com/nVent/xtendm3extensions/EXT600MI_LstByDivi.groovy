@@ -12,21 +12,17 @@
 //****************************************************************************************** 
 
 
-import java.math.RoundingMode 
-import java.math.BigDecimal
-import java.lang.Math
-import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 
 public class LstByDivi extends ExtendM3Transaction {
-  private final MIAPI mi; 
-  private final DatabaseAPI database; 
-  private final ProgramAPI program;
-  private final LoggerAPI logger; 
-  private final MICallerAPI miCaller; 
+  private final MIAPI mi 
+  private final DatabaseAPI database 
+  private final ProgramAPI program
+  private final LoggerAPI logger
+  private final MICallerAPI miCaller 
 
   
   // Definition 
@@ -43,6 +39,7 @@ public class LstByDivi extends ExtendM3Transaction {
   public String invoiceDate
   public String deliveryTerms
   public String year
+  public int yearNumeric
   public String customer
   public String currencyCode
   public String languageCode
@@ -55,7 +52,7 @@ public class LstByDivi extends ExtendM3Transaction {
   public String netPrice
   public String lineAmount
   public int sentFlag
-  public int inCONO
+  public Integer inCONO
   public String inDIVI 
   public String inNBTY
   public String inNBID
@@ -142,11 +139,11 @@ public class LstByDivi extends ExtendM3Transaction {
 
   // Constructor 
   public LstByDivi(MIAPI mi, DatabaseAPI database,ProgramAPI program, LoggerAPI logger, MICallerAPI miCaller) {
-     this.mi = mi;
-     this.database = database; 
-     this.program = program;
-     this.logger = logger; 
-     this.miCaller = miCaller;
+     this.mi = mi
+     this.database = database 
+     this.program = program
+     this.logger = logger 
+     this.miCaller = miCaller
   } 
      
   
@@ -155,7 +152,11 @@ public class LstByDivi extends ExtendM3Transaction {
   //********************************************************************  
   public void main() { 
       // Get LDA company of not entered 
-      inCONO = getCONO()  
+      inCONO = mi.in.get("CONO")      
+      if (inCONO == null || inCONO == 0) {
+        inCONO = program.LDAZD.CONO as Integer
+      } 
+      
       inDIVI = mi.in.get("DIVI")  
       
       currentYear = currentYearAsString()
@@ -178,7 +179,7 @@ public class LstByDivi extends ExtendM3Transaction {
 
       if (lastExportedInvoiceNumberStart != null && lastExportedInvoiceNumberStart != "") {
         // Start the listing
-        lstInvoiceLines()
+        lstDeliveryHead()
         updateCUGEX3Record(inCONO, "PRICEFXINVEXP", inDIVI.trim(), currentYear, numberSeriesForDivision)
       }
       
@@ -199,7 +200,7 @@ public class LstByDivi extends ExtendM3Transaction {
 
       if (lastExportedInvoiceNumberStart != null && lastExportedInvoiceNumberStart != "") {
         // Start the listing
-        lstInvoiceLines()
+        lstDeliveryHead()
         updateCUGEX3Record(inCONO, "PRICEFXINVEXP", inDIVI.trim(), currentYear, numberSeriesForDivision)
       }
 
@@ -207,23 +208,10 @@ public class LstByDivi extends ExtendM3Transaction {
   
                 
   //******************************************************************** 
-  // Get company from LDA
-  //******************************************************************** 
-  private Integer getCONO() {
-    int company = mi.in.get("CONO") as Integer
-    if(company == null){
-      company = program.LDAZD.CONO as Integer
-    } 
-    return company
-    
-  } 
-
-
-  //******************************************************************** 
   // Get Order Delivery Header Info ODHEAD
   //******************************************************************** 
   private Optional<DBContainer> findODHEAD(Integer CONO, String ORNO, String WHLO, Integer DLIX, String TEPY){  
-    DBAction query = database.table("ODHEAD").index("00").selection("UACONO", "UAORNO", "UACUNO", "UADLIX", "UAWHLO", "UAIVNO", "UAIVDT", "UACUNO", "UACUCD", "UATEPY", "UAORST", "UAYEA4", "UATEDL", "UAINPX", "UADIVI", "UAPYNO").build()    
+    DBAction query = database.table("ODHEAD").index("00").selection("UACONO", "UAORNO", "UACUNO", "UADLIX", "UAWHLO", "UAIVDT", "UACUCD", "UATEPY", "UAORST", "UAYEA4", "UATEDL", "UAINPX", "UADIVI", "UAPYNO").build()    
     def ODHEAD = query.getContainer()
     ODHEAD.set("UACONO", CONO)
     ODHEAD.set("UAORNO", ORNO)
@@ -243,7 +231,7 @@ public class LstByDivi extends ExtendM3Transaction {
   // Get Order Header Info OOHEAD
   //******************************************************************** 
   private Optional<DBContainer> findOOHEAD(Integer CONO, String ORNO){  
-    DBAction query = database.table("OOHEAD").index("00").selection("OACONO", "OAORNO", "OACUNO", "OAFACI", "OAORTP", "OAORDT", "OAWCON", "OAADID", "OALNCD").build()    
+    DBAction query = database.table("OOHEAD").index("00").selection("OACONO", "OAORNO", "OAFACI", "OAORTP", "OAORDT", "OAWCON", "OAAGNO", "OALNCD").build()    
     def OOHEAD = query.getContainer()
     OOHEAD.set("OACONO", CONO)
     OOHEAD.set("OAORNO", ORNO)
@@ -260,7 +248,7 @@ public class LstByDivi extends ExtendM3Transaction {
   // Get Order Line Info OOLINE
   //******************************************************************** 
   private Optional<DBContainer> findOOLINE(Integer CONO, String ORNO, Integer PONR, Integer POSX){  
-    DBAction query = database.table("OOLINE").index("00").selection("OBCONO", "OBORNO", "OBPONR", "OBPOSX", "OBADID", "OBRSCD", "OBSMCD", "OBOFNO", "OBAGNO", "OBATNR").build()    
+    DBAction query = database.table("OOLINE").index("00").selection("OBCONO", "OBORNO", "OBPONR", "OBPOSX", "OBADID", "OBRSCD", "OBSMCD", "OBOFNO", "OBAGNO", "OBATNR", "OBUCA2", "OBUCA3").build()    
     def OOLINE = query.getContainer()
     OOLINE.set("OBCONO", CONO)
     OOLINE.set("OBORNO", ORNO)
@@ -476,7 +464,7 @@ public class LstByDivi extends ExtendM3Transaction {
   // Update Last Invoice Number in CUGEX3
   //******************************************************************** 
   void updateCUGEX3Record(int CONO, String KPID, String PK01, String PK02, String PK03){  
-     DBAction action = database.table("CUGEX3").index("00").selectAllFields().build()
+     DBAction action = database.table("CUGEX3").index("00").selection("F3CONO", "F3KPID", "F3PK01", "F3PK02", "F3PK03", "F3A030", "F3RGDT", "F3RGTM", "F3LMDT", "F3CHNO", "F3CHID").build()
      DBContainer CUGEX3 = action.createContainer()
      CUGEX3.set("F3CONO", CONO)
      CUGEX3.set("F3KPID", KPID)
@@ -514,15 +502,6 @@ public class LstByDivi extends ExtendM3Transaction {
  
 
   //******************************************************************** 
-  // Check if null or empty
-  //********************************************************************  
-   public  boolean isNullOrEmpty(String key) {
-        if(key != null && !key.isEmpty())
-            return false;
-        return true;
-    }
-    
-  //******************************************************************** 
   // Get date in yyyyMMdd format
   // @return date
   //******************************************************************** 
@@ -542,19 +521,19 @@ public class LstByDivi extends ExtendM3Transaction {
   // Get current rate
   //******************************************************************** 
   private Optional<String> getCurrencyRate(String cono, String divi, String cucd, String date) {
-    Optional<String> r = Optional.empty() 
+    Optional<String> rate = Optional.empty() 
     def params = ["CONO":cono, "FDDI": divi, "TODI": divi, "FCUR": cucd, "TCUR": cucd, "CRTP": "1".toString(), "CUTD": date] // toString is needed to convert from gstring to string
     String customer = null
     def callback = {
     Map<String, String> response ->
       if(response.ARAT != null){
-        r = Optional.of(response.ARAT.toString())
+        rate = Optional.of(response.ARAT.toString())
       }
     }
     
     miCaller.call("CRS055MI","SelExchangeRate", params, callback)
     
-    return r
+    return rate
     
   }
 
@@ -619,75 +598,36 @@ public class LstByDivi extends ExtendM3Transaction {
     mi.outData.put("UCA3", outUCA3)
     mi.outData.put("EXIN", outEXIN)
     lastExportedInvoiceNumberEnd = outIVNO
-    //lastExportedInvoiceNumberEnd ++
   } 
     
+
   //******************************************************************** 
   // List all information
   //********************************************************************  
-   void lstInvoiceLines(){   
+   void lstDeliveryHead(){   
      
-     // List all Invoice Delivery Lines
-     ExpressionFactory expression = database.getExpressionFactory("ODLINE")
-   
-     expression = expression.eq("UBDIVI", inDIVI).and(expression.gt("UBIVNO", lastExportedInvoiceNumberStart.trim())).and(expression.lt("UBIVNO", lastExportedInvoiceNumberMax.trim()))  
+     DBAction queryODHEAD = database.table("ODHEAD").index("81").selection("UACONO", "UAORNO", "UAIVNO", "UACUNO", "UADLIX", "UAWHLO", "UAIVDT", "UACUCD", "UATEPY", "UAORST", "UAYEA4", "UATEDL", "UAINPX", "UADIVI", "UAPYNO", "UAEXIN").build()    
+     DBContainer containerODHEAD = queryODHEAD.getContainer()
+     containerODHEAD.set("UACONO", inCONO)
+     containerODHEAD.set("UADIVI", inDIVI)
 
-     // List Invoice Delivery Lines   
-     DBAction actionline = database.table("ODLINE").index("20").matching(expression).selection("UBCONO", "UBLMDT", "UBORNO", "UBPONR", "UBPOSX", "UBWHLO", "UBTEPY", "UBIVNO", "UBITNO", "UBLTYP", "UBSPUN", "UBSAPR", "UBNEPR", "UBLNAM", "UBDCOS", "UBDIP1", "UBDIP2", "UBDIP3", "UBDIP4", "UBDIP5", "UBDIP6", "UBEXIN", "UBINPX", "UBYEA4").build()     
-
-     DBContainer line = actionline.getContainer()  
-     
-     // Read with one key  
-     line.set("UBCONO", CONO)  
-     
      int pageSize = mi.getMaxRecords() <= 0 ? 1000 : mi.getMaxRecords()           
 
-     actionline.readAll(line, 1, pageSize, releasedLineProcessor)   
-   
+     queryODHEAD.readAll(containerODHEAD, 2, pageSize, releasedLineProcessorODHEAD)
+
    } 
  
 
-  //******************************************************************** 
-  // List Order Delivery Lnes - main loop - ODLINE
-  //********************************************************************  
-  Closure<?> releasedLineProcessor = { DBContainer line ->   
-  
-  // Fields from ODHEAD to use in the other read
-  company = line.get("UBCONO")
-  deliveryNumber = line.get("UBDLIX") 
-  invoiceNumber = line.get("UBIVNO") 
-  invoiceNumberString = line.get("UBIVNO")  
-  orderNumber = line.get("UBORNO")
-  orderLine = line.get("UBPONR")
-  orderLineSuffix = line.get("UBPOSX")
-  paymentTerms = line.get("UBTEPY")
-  warehouse = line.get("UBWHLO")
-  itemNumber = line.get("UBITNO")
-  orderLineString = line.get("UBPONR")
-  orderLineSuffixString = line.get("UBPOSX")
-  salesPrice = line.get("UBSAPR")
-  netPrice = line.get("UBNEPR")
-  lineAmount = line.get("UBLNAM")
-  extInvoiceNumber = line.get("UBEXIN")  
-  discount1 = line.get("UBDIP1")     
-  discount2 = line.get("UBDIP2")     
-  discount3 = line.get("UBDIP3")     
-  discount4 = line.get("UBDIP4")     
-  discount5 = line.get("UBDIP5")     
-  discount6 = line.get("UBDIP6")    
 
-  //Sum of discounts
-  discountSum = 0                                                              
-  discountSum = discount1 + discount2 + discount3 + discount5 + discount6      
+  //******************************************************************** 
+  // List Order Deliveries - main loop - ODHEAD
+  //********************************************************************  
+  Closure<?> releasedLineProcessorODHEAD = { DBContainer containerODHEAD ->   
   
-  // Get Delivery Head Info 
-  Optional<DBContainer> ODHEAD = findODHEAD(company, orderNumber, warehouse, deliveryNumber, paymentTerms)
-  if(ODHEAD.isPresent()){
-    // Record found, continue to get information  
-    DBContainer containerODHEAD = ODHEAD.get() 
-    
     companyString = containerODHEAD.get("UACONO") 
     division = containerODHEAD.get("UADIVI") 
+    invoiceNumber = containerODHEAD.get("UAIVNO") 
+    invoiceNumberString = containerODHEAD.get("UAIVNO") 
     deliveryNumberString = containerODHEAD.get("UADLIX")  
     orderStatus = containerODHEAD.getString("UAORST")
     customer = containerODHEAD.getString("UACUNO")  
@@ -695,172 +635,227 @@ public class LstByDivi extends ExtendM3Transaction {
     paymentTerms = containerODHEAD.getString("UATEPY")  
     deliveryTerms = containerODHEAD.getString("UATEDL")  
     invoiceDate = String.valueOf(containerODHEAD.get("UAIVDT"))  
-    year = String.valueOf(containerODHEAD.get("UAYEA4")) 
+    year = String.valueOf(containerODHEAD.get("UAYEA4"))
+    yearNumeric = containerODHEAD.get("UAYEA4")
     invoicePrefix = containerODHEAD.get("UAINPX")                   
     payer = containerODHEAD.get("UAPYNO")                           
 
+    if (invoiceNumberString > lastExportedInvoiceNumberStart.trim() && invoiceNumberString <= lastExportedInvoiceNumberMax.trim()) {
+       lstInvoiceLines(yearNumeric, invoicePrefix, invoiceNumber)
+    }
   } 
   
-  
-  if (orderStatus >= "70") {
-        outCONO = String.valueOf(line.get("UBCONO"))
-        outDLIX = String.valueOf(line.get("UBDLIX"))
-        outIVNO = String.valueOf(line.get("UBIVNO")) 
-        outITNO = String.valueOf(line.get("UBITNO"))  
-        outLTYP = String.valueOf(line.get("UBLTYP"))
-        outSPUN = String.valueOf(line.get("UBSPUN"))
-        outCUNO = customer
-        outCUCD = currencyCode 
-        outTEPY = paymentTerms
-        outORST = orderStatus
-        outDLIX = deliveryNumber
-        outSAPR = salesPrice
-        outNEPR = netPrice
-        outLNAM = lineAmount
-        outTEDL = deliveryTerms
-        outIVDT = invoiceDate
-        outYEA4 = year
-        outDISC = discountSum   
-        outDISM = discount4     
-        outPYNO = payer
-        outWHLO = warehouse
-        outEXIN = extInvoiceNumber
-        
-        // Find exchange rate
-        Optional<String> tmpARAT = getCurrencyRate(outCONO, division, outCUCD, invoiceDate)
-        if(tmpARAT.isPresent()) {
-          outARAT = tmpARAT.get()
-        } else {
-          outARAT = ""
-        }
-        
-        // Get Order Head Info 
-        Optional<DBContainer> OOHEAD = findOOHEAD(company, orderNumber)
-        if(OOHEAD.isPresent()){
-          // Record found, continue to get information  
-          DBContainer containerOOHEAD = OOHEAD.get() 
-          outORDT = String.valueOf(containerOOHEAD.get("OAORDT"))  
-          outFACI = containerOOHEAD.getString("OAFACI")  
-          outORTP = containerOOHEAD.getString("OAORTP")   
-          outWCON = containerOOHEAD.getString("OAWCON")   
-          outORNO = containerOOHEAD.getString("OAORNO")  
-          outAGNH = containerOOHEAD.getString("OAAGNO")         
-          languageCode = containerOOHEAD.getString("OALNCD")   
-        } else {
-          outORDT = ""
-          outFACI = ""
-          outORTP = ""
-          outWCON = ""
-          outORNO = ""
-          languageCode = ""
-        } 
 
-        // TEDL text
-        Optional<DBContainer> CSYTAB = findCSYTAB(company, deliveryTerms, languageCode)
-        if(CSYTAB.isPresent()){
-          // Record found, continue to get information  
-          DBContainer containerCSYTAB = CSYTAB.get() 
-          outTEL1 = containerCSYTAB.getString("CTPARM")  
-        } else {
-          outTEL1 = ""
-        } 
-
-        // Get Order Line Info 
-        Optional<DBContainer> OOLINE = findOOLINE(company, orderNumber, orderLine, orderLineSuffix)
-        if(OOLINE.isPresent()){
-          // Record found, continue to get information  
-          DBContainer containerOOLINE = OOLINE.get() 
-          outADID = containerOOLINE.getString("OBADID")  
-          outRSCD = containerOOLINE.getString("OBRSCD")   
-          outSMCD = containerOOLINE.getString("OBSMCD")   
-          outOFNO = containerOOLINE.getString("OBOFNO")   
-          outAGNO = containerOOLINE.getString("OBAGNO") 
-          attributeNumber = containerOOLINE.get("OBATNR") 
-          outPONR = containerOOLINE.get("OBPONR") 
-          outUCA2 = containerOOLINE.getString("OBUCA2") 
-          outUCA3 = containerOOLINE.getString("OBUCA3") 
-        } else {
-          outADID = ""
-          outRSCD = ""
-          outSMCD = ""
-          outOFNO = ""
-          outAGNO = ""
-          attributeNumber = 0
-          outPONR = 0
-          outUCA2 = ""
-          outUCA3 = ""
-        }
-
+  //******************************************************************** 
+  // List all information
+  //********************************************************************  
+   void lstInvoiceLines(int yea4, String inpx, int ivno){   
      
-        // Get Item information 
-        Optional<DBContainer> MITMAS = findMITMAS(company, itemNumber)
-        if(MITMAS.isPresent()){
-          // Record found, continue to get information  
-          DBContainer containerMITMAS = MITMAS.get() 
-          outITDS = containerMITMAS.getString("MMITDS")   
-          outHIE1 = containerMITMAS.getString("MMHIE1")   
-          outHIE2 = containerMITMAS.getString("MMHIE2")   
-          outHIE3 = containerMITMAS.getString("MMHIE3")  
-          outHIE4 = containerMITMAS.getString("MMHIE4")  
-          outHIE5 = containerMITMAS.getString("MMHIE5")  
-        } else {
-          outITDS = ""
-          outHIE1 = ""
-          outHIE2 = ""
-          outHIE3 = ""
-          outHIE4 = ""
-          outHIE5 = ""
-        }
-        
-        // Get Attribute information 
-        Optional<DBContainer> MOATTR = findMOATTR(company, attributeNumber, "FOCUS", "0")
-        if(MOATTR.isPresent()){
-          // Record found, continue to get information  
-          DBContainer containerMOATTR = MOATTR.get() 
-          outATAV = containerMOATTR.getString("AHATAV")   
-        } else {
-          outATAV = ""
-        }
+     DBAction queryODLINE = database.table("ODLINE").index("20").selection("UBCONO", "UBLMDT", "UBORNO", "UBPONR", "UBPOSX", "UBWHLO", "UBTEPY", "UBIVNO", "UBITNO", "UBLTYP", "UBSPUN", "UBSAPR", "UBNEPR", "UBLNAM", "UBDCOS", "UBDIP1", "UBDIP2", "UBDIP3", "UBDIP4", "UBDIP5", "UBDIP6", "UBEXIN", "UBINPX", "UBYEA4").build()     
 
-        getDeliveryAddress(companyString, deliveryNumberString, "01")
-        
-        getAdditionalDelLineInfo(companyString, orderNumber, deliveryNumberString, warehouse, orderLineString, orderLineSuffixString, paymentTerms)
-        
-        invCharge = 0
-        outCHGH = ""
-        informationType = "65"
-        getInvoiceCharges(companyString, division, year, invoiceNumberString, informationType, invoicePrefix, extInvoiceNumber)    
-        outCHGH = invCharge
-        
-        invCharge = 0
-        outCHGF = ""
-        informationType = "60"
-        getInvoiceCharges(companyString, division, year, invoiceNumberString, informationType, invoicePrefix, extInvoiceNumber)    
-        if (invReference != null) {
-          if (invReference.startsWith("F")) {
-            outCHGF = invCharge
+     DBContainer containerODLINE = queryODLINE.getContainer()
+     containerODLINE.set("UBCONO", inCONO)
+     containerODLINE.set("UBDIVI", inDIVI)
+     containerODLINE.set("UBYEA4", yea4)
+     containerODLINE.set("UBINPX", inpx)
+     containerODLINE.set("UBIVNO", ivno)
+     
+     int pageSize = mi.getMaxRecords() <= 0 ? 1000 : mi.getMaxRecords()           
+
+     queryODLINE.readAll(containerODLINE, 5, pageSize, releasedLineProcessorODLINE)
+
+   } 
+ 
+
+
+  //******************************************************************** 
+  // List Order Delivery Lines - main loop - ODLINE
+  //********************************************************************  
+  Closure<?> releasedLineProcessorODLINE = { DBContainer containerODLINE ->   
+    
+    company = containerODLINE.get("UBCONO")
+    deliveryNumber = containerODLINE.get("UBDLIX") 
+    orderNumber = containerODLINE.get("UBORNO")
+    orderLine = containerODLINE.get("UBPONR")
+    orderLineSuffix = containerODLINE.get("UBPOSX")
+    paymentTerms = containerODLINE.get("UBTEPY")
+    warehouse = containerODLINE.get("UBWHLO")
+    itemNumber = containerODLINE.get("UBITNO")
+    orderLineString = containerODLINE.get("UBPONR")
+    orderLineSuffixString = containerODLINE.get("UBPOSX")
+    salesPrice = containerODLINE.get("UBSAPR")
+    netPrice = containerODLINE.get("UBNEPR")
+    lineAmount = containerODLINE.get("UBLNAM")
+    extInvoiceNumber = containerODLINE.get("UBEXIN")  
+    discount1 = containerODLINE.get("UBDIP1")     
+    discount2 = containerODLINE.get("UBDIP2")     
+    discount3 = containerODLINE.get("UBDIP3")     
+    discount4 = containerODLINE.get("UBDIP4")     
+    discount5 = containerODLINE.get("UBDIP5")     
+    discount6 = containerODLINE.get("UBDIP6")    
+  
+    //Sum of discounts
+    discountSum = 0                                                              
+    discountSum = discount1 + discount2 + discount3 + discount5 + discount6      
+    
+    if (orderStatus >= "70") {
+          outCONO = String.valueOf(containerODLINE.get("UBCONO"))
+          outDLIX = String.valueOf(containerODLINE.get("UBDLIX"))
+          outIVNO = String.valueOf(containerODLINE.get("UBIVNO")) 
+          outITNO = String.valueOf(containerODLINE.get("UBITNO"))  
+          outLTYP = String.valueOf(containerODLINE.get("UBLTYP"))
+          outSPUN = String.valueOf(containerODLINE.get("UBSPUN"))
+          outCUNO = customer
+          outCUCD = currencyCode 
+          outTEPY = paymentTerms
+          outORST = orderStatus
+          outDLIX = deliveryNumber
+          outSAPR = salesPrice
+          outNEPR = netPrice
+          outLNAM = lineAmount
+          outTEDL = deliveryTerms
+          outIVDT = invoiceDate
+          outYEA4 = year
+          outDISC = discountSum   
+          outDISM = discount4     
+          outPYNO = payer
+          outWHLO = warehouse
+          outEXIN = extInvoiceNumber
+          
+          // Find exchange rate
+          Optional<String> tmpARAT = getCurrencyRate(outCONO, division, outCUCD, invoiceDate)
+          if(tmpARAT.isPresent()) {
+            outARAT = tmpARAT.get()
+          } else {
+            outARAT = ""
           }
-        }
-        
-        invCharge = 0
-        outCHGO = ""
-        informationType = "60"
-        getInvoiceCharges(companyString, division, year, invoiceNumberString, informationType, invoicePrefix, extInvoiceNumber)    
-        if (invReference != null) {
-          if (!invReference.startsWith("F")) {
-            outCHGO = invCharge
+          
+          // Get Order Head Info 
+          Optional<DBContainer> OOHEAD = findOOHEAD(company, orderNumber)
+          if(OOHEAD.isPresent()){
+            // Record found, continue to get information  
+            DBContainer containerOOHEAD = OOHEAD.get() 
+            outORDT = String.valueOf(containerOOHEAD.get("OAORDT"))  
+            outFACI = containerOOHEAD.getString("OAFACI")  
+            outORTP = containerOOHEAD.getString("OAORTP")   
+            outWCON = containerOOHEAD.getString("OAWCON")   
+            outORNO = containerOOHEAD.getString("OAORNO")  
+            outAGNH = containerOOHEAD.getString("OAAGNO")         
+            languageCode = containerOOHEAD.getString("OALNCD")   
+          } else {
+            outORDT = ""
+            outFACI = ""
+            outORTP = ""
+            outWCON = ""
+            outORNO = ""
+            languageCode = ""
+          } 
+  
+          // TEDL text
+          Optional<DBContainer> CSYTAB = findCSYTAB(company, deliveryTerms, languageCode)
+          if(CSYTAB.isPresent()){
+            // Record found, continue to get information  
+            DBContainer containerCSYTAB = CSYTAB.get() 
+            outTEL1 = containerCSYTAB.getString("CTPARM")  
+          } else {
+            outTEL1 = ""
+          } 
+  
+          // Get Order Line Info 
+          Optional<DBContainer> OOLINE = findOOLINE(company, orderNumber, orderLine, orderLineSuffix)
+          if(OOLINE.isPresent()){
+            // Record found, continue to get information  
+            DBContainer containerOOLINE = OOLINE.get() 
+            outADID = containerOOLINE.getString("OBADID")  
+            outRSCD = containerOOLINE.getString("OBRSCD")   
+            outSMCD = containerOOLINE.getString("OBSMCD")   
+            outOFNO = containerOOLINE.getString("OBOFNO")   
+            outAGNO = containerOOLINE.getString("OBAGNO") 
+            attributeNumber = containerOOLINE.get("OBATNR") 
+            outPONR = containerOOLINE.get("OBPONR") 
+            outUCA2 = containerOOLINE.getString("OBUCA2") 
+            outUCA3 = containerOOLINE.getString("OBUCA3") 
+          } else {
+            outADID = ""
+            outRSCD = ""
+            outSMCD = ""
+            outOFNO = ""
+            outAGNO = ""
+            attributeNumber = 0
+            outPONR = 0
+            outUCA2 = ""
+            outUCA3 = ""
           }
-        }
-
-        
-        getDivisionInfo(companyString, division)
-        
-      // Send Output
-      setOutput()
-      mi.write() 
-
-   }
-
+  
+       
+          // Get Item information 
+          Optional<DBContainer> MITMAS = findMITMAS(company, itemNumber)
+          if(MITMAS.isPresent()){
+            // Record found, continue to get information  
+            DBContainer containerMITMAS = MITMAS.get() 
+            outITDS = containerMITMAS.getString("MMITDS")   
+            outHIE1 = containerMITMAS.getString("MMHIE1")   
+            outHIE2 = containerMITMAS.getString("MMHIE2")   
+            outHIE3 = containerMITMAS.getString("MMHIE3")  
+            outHIE4 = containerMITMAS.getString("MMHIE4")  
+            outHIE5 = containerMITMAS.getString("MMHIE5")  
+          } else {
+            outITDS = ""
+            outHIE1 = ""
+            outHIE2 = ""
+            outHIE3 = ""
+            outHIE4 = ""
+            outHIE5 = ""
+          }
+          
+          // Get Attribute information 
+          Optional<DBContainer> MOATTR = findMOATTR(company, attributeNumber, "FOCUS", "0")
+          if(MOATTR.isPresent()){
+            // Record found, continue to get information  
+            DBContainer containerMOATTR = MOATTR.get() 
+            outATAV = containerMOATTR.getString("AHATAV")   
+          } else {
+            outATAV = ""
+          }
+  
+          getDeliveryAddress(companyString, deliveryNumberString, "01")
+          
+          getAdditionalDelLineInfo(companyString, orderNumber, deliveryNumberString, warehouse, orderLineString, orderLineSuffixString, paymentTerms)
+          
+          invCharge = 0
+          outCHGH = ""
+          informationType = "65"
+          getInvoiceCharges(companyString, division, year, invoiceNumberString, informationType, invoicePrefix, extInvoiceNumber)    
+          outCHGH = invCharge
+          
+          invCharge = 0
+          outCHGF = ""
+          informationType = "60"
+          getInvoiceCharges(companyString, division, year, invoiceNumberString, informationType, invoicePrefix, extInvoiceNumber)    
+          if (invReference != null) {
+            if (invReference.startsWith("F")) {
+              outCHGF = invCharge
+            }
+          }
+          
+          invCharge = 0
+          outCHGO = ""
+          informationType = "60"
+          getInvoiceCharges(companyString, division, year, invoiceNumberString, informationType, invoicePrefix, extInvoiceNumber)    
+          if (invReference != null) {
+            if (!invReference.startsWith("F")) {
+              outCHGO = invCharge
+            }
+          }
+  
+          
+          getDivisionInfo(companyString, division)
+          
+        // Send Output
+        setOutput()
+        mi.write() 
+  
+     }
 
   }
   
