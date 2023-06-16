@@ -611,7 +611,7 @@ public class LstByDivi extends ExtendM3Transaction {
      containerODHEAD.set("UACONO", inCONO)
      containerODHEAD.set("UADIVI", inDIVI)
 
-     int pageSize = mi.getMaxRecords() <= 0 ? 1000 : mi.getMaxRecords()           
+     int pageSize = mi.getMaxRecords() <= 0 || mi.getMaxRecords() >= 1000? 1000: mi.getMaxRecords()       
 
      queryODHEAD.readAll(containerODHEAD, 2, pageSize, releasedLineProcessorODHEAD)
 
@@ -660,7 +660,7 @@ public class LstByDivi extends ExtendM3Transaction {
      containerODLINE.set("UBINPX", inpx)
      containerODLINE.set("UBIVNO", ivno)
      
-     int pageSize = mi.getMaxRecords() <= 0 ? 1000 : mi.getMaxRecords()           
+     int pageSize = mi.getMaxRecords() <= 0 || mi.getMaxRecords() >= 1000? 1000: mi.getMaxRecords()        
 
      queryODLINE.readAll(containerODLINE, 5, pageSize, releasedLineProcessorODLINE)
 

@@ -535,7 +535,7 @@ public class ExpInvCopy extends ExtendM3Transaction {
      containerFSLEDX.set("ESDIVI", inDIVI)
      containerFSLEDX.set("ESSEXN", 392)
      
-     int pageSize = mi.getMaxRecords() <= 0 ? 1000 : mi.getMaxRecords()           
+     int pageSize = mi.getMaxRecords() <= 0 || mi.getMaxRecords() >= 1000? 1000: mi.getMaxRecords()     
 
      queryFSLEDX.readAll(containerFSLEDX, 3, pageSize, releasedLineProcessorFSLEDX)
 
@@ -586,7 +586,7 @@ public class ExpInvCopy extends ExtendM3Transaction {
      containerODHEAD.set("UAYEA4", year)
      containerODHEAD.set("UAEXIN", ivno)
 
-     int pageSize = mi.getMaxRecords() <= 0 ? 1000 : mi.getMaxRecords()           
+     int pageSize = mi.getMaxRecords() <= 0 || mi.getMaxRecords() >= 1000? 1000: mi.getMaxRecords()        
 
      queryODHEAD.readAll(containerODHEAD, 4, pageSize, releasedLineProcessorODHEAD)
 
@@ -633,7 +633,7 @@ public class ExpInvCopy extends ExtendM3Transaction {
      containerODLINE.set("UBINPX", inpx)
      containerODLINE.set("UBIVNO", ivno)
      
-     int pageSize = mi.getMaxRecords() <= 0 ? 1000 : mi.getMaxRecords()           
+     int pageSize = mi.getMaxRecords() <= 0 || mi.getMaxRecords() >= 1000? 1000: mi.getMaxRecords()     
 
      queryODLINE.readAll(containerODLINE, 5, pageSize, releasedLineProcessorODLINE)
 
