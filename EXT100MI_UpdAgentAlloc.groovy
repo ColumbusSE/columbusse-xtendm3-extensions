@@ -3,8 +3,8 @@
 // @version   1.0 
 //
 // Description 
-// This API is used to delete a agent allocation record from table EXTAGA
-// Transaction DelAgentAlloc
+// This API is used to update an agent allocation record from table EXTAGA
+// Transaction UpdAgentAlloc
 // 
 
 //**************************************************************************** 
@@ -186,7 +186,7 @@ public class UpdAgentAlloc extends ExtendM3Transaction {
   // Get Company record
   //******************************************************************** 
   private Optional<DBContainer> findCMNCMP(Integer CONO){                             
-      DBAction query = database.table("CMNCMP").index("00").selection("JICONO").build()   
+      DBAction query = database.table("CMNCMP").index("00").build()   
       DBContainer CMNCMP = query.getContainer()                                           
       CMNCMP.set("JICONO", CONO)                                                         
       if(query.read(CMNCMP))  {                                                           
@@ -199,7 +199,7 @@ public class UpdAgentAlloc extends ExtendM3Transaction {
   // Check Payer/Customer
   //******************************************************************** 
   private Optional<DBContainer> findOCUSMA(int CONO, String CUNO){  
-    DBAction query = database.table("OCUSMA").index("00").selection("OKCONO", "OKDIVI", "OKCUNO", "OKPYNO").build()   
+    DBAction query = database.table("OCUSMA").index("00").build()   
     def OCUSMA = query.getContainer()
     OCUSMA.set("OKCONO", CONO)
     OCUSMA.set("OKDIVI", "")
@@ -216,7 +216,7 @@ public class UpdAgentAlloc extends ExtendM3Transaction {
   // Check Country Code
   //******************************************************************** 
   private Optional<DBContainer> findCSYTAB(int CONO, String CSCD){  
-    DBAction query = database.table("CSYTAB").index("00").selection("CTCONO", "CTDIVI", "CTSTCO", "CTSTKY", "CTLNCD").build()   
+    DBAction query = database.table("CSYTAB").index("00").build()   
     def CSYTAB = query.getContainer()
     CSYTAB.set("CTCONO", CONO)
     CSYTAB.set("CTDIVI", "")
@@ -235,7 +235,7 @@ public class UpdAgentAlloc extends ExtendM3Transaction {
   // Check State
   //******************************************************************** 
   private Optional<DBContainer> findCSYSTS(int CONO, String ECAR, String CSCD){  
-    DBAction query = database.table("CSYSTS").index("00").selection("CKCONO", "CKECAR", "CKCSCD").build()   
+    DBAction query = database.table("CSYSTS").index("00").build()   
     def CSYSTS = query.getContainer()
     CSYSTS.set("CKCONO", CONO)
     CSYSTS.set("CKECAR", ECAR)
@@ -252,7 +252,7 @@ public class UpdAgentAlloc extends ExtendM3Transaction {
   // Check Focus/Option
   //******************************************************************** 
   private Optional<DBContainer> findMPDOPT(int CONO, String OPTN){  
-    DBAction query = database.table("MPDOPT").index("00").selection("PFCONO", "PFOPTN").build()   
+    DBAction query = database.table("MPDOPT").index("00").build()   
     def MPDOPT = query.getContainer()
     MPDOPT.set("PFCONO", CONO)
     MPDOPT.set("PFOPTN", OPTN)
@@ -268,7 +268,7 @@ public class UpdAgentAlloc extends ExtendM3Transaction {
   // Check Hierarchy 3
   //******************************************************************** 
   private Optional<DBContainer> findMITHRY(int CONO, int HLVL, String HIE0){  
-    DBAction query = database.table("MITHRY").index("00").selection("HICONO", "HIHLVL", "HIHIE0").build()   
+    DBAction query = database.table("MITHRY").index("00").build()   
     def MITHRY = query.getContainer()
     MITHRY.set("HICONO", CONO)
     MITHRY.set("HIHLVL", HLVL)
@@ -285,7 +285,7 @@ public class UpdAgentAlloc extends ExtendM3Transaction {
   // Validate if record exists in EXTAGA
   //******************************************************************** 
   private Optional<DBContainer> findEXTAGA(int CONO, int PRIO, String PYNO, String CUNO, String CSCD, String ECAR, String PONO, String ATAV, String HIE3, int FDAT){  
-      DBAction query = database.table("EXTAGA").index("00").selectAllFields().build()   
+      DBAction query = database.table("EXTAGA").index("00").build()   
       def EXTAGA = query.getContainer()
       EXTAGA.set("EXCONO", CONO)
       EXTAGA.set("EXPRIO", PRIO)
@@ -323,7 +323,7 @@ public class UpdAgentAlloc extends ExtendM3Transaction {
   // Update Agent Allocation record
   //******************************************************************** 
   void updRecord(){ 
-       DBAction action = database.table("EXTAGA").index("00").selectAllFields().build()
+       DBAction action = database.table("EXTAGA").index("00").build()
        DBContainer EXTAGA = action.createContainer()
        EXTAGA.set("EXCONO", CONO)
        EXTAGA.set("EXPRIO", inPRIO)

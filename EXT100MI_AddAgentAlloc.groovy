@@ -12,11 +12,11 @@
 // 230419  1.0         Jessica Bjorklund, Columbus   New API transaction
 //**************************************************************************** 
 
-import java.time.Instant; 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
+import java.time.Instant 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 
 
 public class AddAgentAlloc extends ExtendM3Transaction {
@@ -240,7 +240,7 @@ public class AddAgentAlloc extends ExtendM3Transaction {
   // Get Company record
   //******************************************************************** 
   private Optional<DBContainer> findCMNCMP(Integer CONO){                             
-      DBAction query = database.table("CMNCMP").index("00").selection("JICONO").build()   
+      DBAction query = database.table("CMNCMP").index("00").build()   
       DBContainer CMNCMP = query.getContainer()                                           
       CMNCMP.set("JICONO", CONO)                                                         
       if(query.read(CMNCMP))  {                                                           
@@ -253,7 +253,7 @@ public class AddAgentAlloc extends ExtendM3Transaction {
   // Check Payer/Customer
   //******************************************************************** 
   private Optional<DBContainer> findOCUSMA(int CONO, String CUNO){  
-    DBAction query = database.table("OCUSMA").index("00").selection("OKCONO", "OKDIVI", "OKCUNO", "OKPYNO").build()   
+    DBAction query = database.table("OCUSMA").index("00").build()   
     def OCUSMA = query.getContainer()
     OCUSMA.set("OKCONO", CONO)
     OCUSMA.set("OKDIVI", "")
@@ -270,7 +270,7 @@ public class AddAgentAlloc extends ExtendM3Transaction {
   // Check Country Code
   //******************************************************************** 
   private Optional<DBContainer> findCSYTAB(int CONO, String CSCD){  
-    DBAction query = database.table("CSYTAB").index("00").selection("CTCONO", "CTDIVI", "CTSTCO", "CTSTKY", "CTLNCD").build()   
+    DBAction query = database.table("CSYTAB").index("00").build()   
     def CSYTAB = query.getContainer()
     CSYTAB.set("CTCONO", CONO)
     CSYTAB.set("CTDIVI", "")
@@ -289,7 +289,7 @@ public class AddAgentAlloc extends ExtendM3Transaction {
   // Check State
   //******************************************************************** 
   private Optional<DBContainer> findCSYSTS(int CONO, String ECAR, String CSCD){  
-    DBAction query = database.table("CSYSTS").index("00").selection("CKCONO", "CKECAR", "CKCSCD").build()   
+    DBAction query = database.table("CSYSTS").index("00").build()   
     def CSYSTS = query.getContainer()
     CSYSTS.set("CKCONO", CONO)
     CSYSTS.set("CKECAR", ECAR)
@@ -306,7 +306,7 @@ public class AddAgentAlloc extends ExtendM3Transaction {
   // Check Focus/Option
   //******************************************************************** 
   private Optional<DBContainer> findMPDOPT(int CONO, String OPTN){  
-    DBAction query = database.table("MPDOPT").index("00").selection("PFCONO", "PFOPTN").build()   
+    DBAction query = database.table("MPDOPT").index("00").build()   
     def MPDOPT = query.getContainer()
     MPDOPT.set("PFCONO", CONO)
     MPDOPT.set("PFOPTN", OPTN)
@@ -322,7 +322,7 @@ public class AddAgentAlloc extends ExtendM3Transaction {
   // Check Hierarchy 3
   //******************************************************************** 
   private Optional<DBContainer> findMITHRY(int CONO, int HLVL, String HIE0){  
-    DBAction query = database.table("MITHRY").index("00").selection("HICONO", "HIHLVL", "HIHIE0").build()   
+    DBAction query = database.table("MITHRY").index("00").build()   
     def MITHRY = query.getContainer()
     MITHRY.set("HICONO", CONO)
     MITHRY.set("HIHLVL", HLVL)
@@ -351,7 +351,7 @@ public class AddAgentAlloc extends ExtendM3Transaction {
   // Validate if record exists in EXTAGA
   //******************************************************************** 
   private Optional<DBContainer> findEXTAGA(int CONO, int PRIO, String PYNO, String CUNO, String CSCD, String ECAR, String PONO, String ATAV, String HIE3, int FDAT){  
-      DBAction query = database.table("EXTAGA").index("00").selectAllFields().build()   
+      DBAction query = database.table("EXTAGA").index("00").build()   
       def EXTAGA = query.getContainer()
       EXTAGA.set("EXCONO", CONO)
       EXTAGA.set("EXPRIO", PRIO)
@@ -375,7 +375,7 @@ public class AddAgentAlloc extends ExtendM3Transaction {
     // Get Agent from EXTAGA
     //******************************************************************** 
     private Optional<DBContainer> findEXTAGA(Integer CONO, int PRIO, String PYNO, String CUNO, String CSCD, String ECAR, String PONO, String ATAV, String HIE3, int FDAT){  
-      DBAction query = database.table("EXTAGA").index("00").selectAllFields().build()   
+      DBAction query = database.table("EXTAGA").index("00").build()   
       def EXTAGA = query.getContainer()
       EXTAGA.set("EXCONO", CONO)
       EXTAGA.set("EXPRIO", PRIO)
@@ -400,7 +400,7 @@ public class AddAgentAlloc extends ExtendM3Transaction {
   // Add EXTAGA record
   //********************************************************************     
   void addRecord(int CONO, int PRIO, String PYNO, String CUNO, String CSCD, String ECAR, String PONO, String ATAV, String HIE3, int FDAT, int TDAT, String AGN1, String AGN2){     
-     DBAction action = database.table("EXTAGA").index("00").selectAllFields().build()
+     DBAction action = database.table("EXTAGA").index("00").build()
      DBContainer EXTAGA = action.createContainer()
      EXTAGA.set("EXCONO", CONO)
      EXTAGA.set("EXPRIO", PRIO)
@@ -419,15 +419,15 @@ public class AddAgentAlloc extends ExtendM3Transaction {
      EXTAGA.set("EXCHID", program.getUser())
      EXTAGA.set("EXCHNO", 1) 
      
-     LocalDateTime now = LocalDateTime.now();    
-     DateTimeFormatter format1 = DateTimeFormatter.ofPattern("yyyyMMdd");  
-     String formatDate = now.format(format1);    
-     DateTimeFormatter format2 = DateTimeFormatter.ofPattern("HHmmss");  
-     String formatTime = now.format(format2);  
+     LocalDateTime now = LocalDateTime.now()    
+     DateTimeFormatter format1 = DateTimeFormatter.ofPattern("yyyyMMdd")  
+     String formatDate = now.format(format1)    
+     DateTimeFormatter format2 = DateTimeFormatter.ofPattern("HHmmss")  
+     String formatTime = now.format(format2)  
      
      //Converting String into int using Integer.parseInt()
-     int regdate=Integer.parseInt(formatDate); 
-     int regtime=Integer.parseInt(formatTime); 
+     int regdate=Integer.parseInt(formatDate) 
+     int regtime=Integer.parseInt(formatTime) 
      EXTAGA.set("EXRGDT", regdate) 
      EXTAGA.set("EXLMDT", regdate) 
      EXTAGA.set("EXRGTM", regtime)

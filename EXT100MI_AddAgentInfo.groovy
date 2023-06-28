@@ -12,11 +12,11 @@
 // 230419  1.0         Jessica Bjorklund, Columbus   New API transaction
 //**************************************************************************** 
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 
 
 public class AddAgentInfo extends ExtendM3Transaction {
@@ -75,7 +75,22 @@ public class AddAgentInfo extends ExtendM3Transaction {
      if(!OCUSMAAgent2.isPresent()){                         
        mi.error("Agent 2 " + inAGN2 + " is invalid")   
        return                                         
-     } 
+     } else {
+        DBContainer containerOCUSMAAgent2 = OCUSMAAgent2.get() 
+        String inSTAT = containerOCUSMAAgent2.getString("OKSTAT")
+        int inCUTP = containerOCUSMAAgent2.get("OKCUTP")
+
+        if (inSTAT != "20") {
+           mi.error("Customer status " + inSTAT + " is invalid")   
+           return                                         
+        }
+        
+        if (inCUTP != 0 && inCUTP != 1 && inCUTP != 2) {
+           mi.error("Customer type " + inCUTP + " is invalid")   
+           return                                         
+        }
+     }
+     
      
      inAGN3 = mi.in.get("AGN3") 
      if (inAGN3 != null && inAGN3 != "") {
@@ -83,8 +98,24 @@ public class AddAgentInfo extends ExtendM3Transaction {
        if(!OCUSMAAgent3.isPresent()){                         
          mi.error("Agent 3 " + inAGN3 + " is invalid")   
          return                                         
-       }  
+       } else {
+         DBContainer containerOCUSMAAgent3 = OCUSMAAgent3.get() 
+         String inSTAT = containerOCUSMAAgent3.getString("OKSTAT")
+         int inCUTP = containerOCUSMAAgent3.get("OKCUTP")
+
+         if (inSTAT != "20") {
+            mi.error("Customer status " + inSTAT + " is invalid")   
+            return                                         
+         }
+        
+         if (inCUTP != 0 && inCUTP != 1 && inCUTP != 2) {
+            mi.error("Customer type " + inCUTP + " is invalid")   
+            return                                         
+         }
+
+       } 
      }
+
 
      inAGN4 = mi.in.get("AGN4")   
      if (inAGN4 != null && inAGN4 != "") {
@@ -92,8 +123,24 @@ public class AddAgentInfo extends ExtendM3Transaction {
        if(!OCUSMAAgent4.isPresent()){                         
          mi.error("Agent 4 " + inAGN4 + " is invalid")   
          return                                         
+       } else {
+         DBContainer containerOCUSMAAgent4 = OCUSMAAgent4.get() 
+         String inSTAT = containerOCUSMAAgent4.getString("OKSTAT")
+         int inCUTP = containerOCUSMAAgent4.get("OKCUTP")
+
+         if (inSTAT != "20") {
+            mi.error("Customer status " + inSTAT + " is invalid")   
+            return                                         
+         }
+        
+         if (inCUTP != 0 && inCUTP != 1 && inCUTP != 2) {
+            mi.error("Customer type " + inCUTP + " is invalid")   
+            return                                         
+         }
+
        }   
      }
+
 
      inAGN5 = mi.in.get("AGN5")
      if (inAGN5 != null && inAGN5 != "") {
@@ -101,8 +148,24 @@ public class AddAgentInfo extends ExtendM3Transaction {
        if(!OCUSMAAgent5.isPresent()){                         
          mi.error("Agent 5 " + inAGN5 + " is invalid")   
          return                                         
+       } else {
+         DBContainer containerOCUSMAAgent5 = OCUSMAAgent5.get() 
+         String inSTAT = containerOCUSMAAgent5.getString("OKSTAT")
+         int inCUTP = containerOCUSMAAgent5.get("OKCUTP")
+
+         if (inSTAT != "20") {
+            mi.error("Customer status " + inSTAT + " is invalid")   
+            return                                         
+         }
+        
+         if (inCUTP != 0 && inCUTP != 1 && inCUTP != 2) {
+            mi.error("Customer type " + inCUTP + " is invalid")   
+            return                                         
+         }
+
        }  
      }
+
 
      inAGN6 = mi.in.get("AGN6") 
      if (inAGN6 != null && inAGN6 != "") {
@@ -110,8 +173,24 @@ public class AddAgentInfo extends ExtendM3Transaction {
        if(!OCUSMAAgent6.isPresent()){                         
          mi.error("Agent 6 " + inAGN6 + " is invalid")   
          return                                         
+       } else {
+         DBContainer containerOCUSMAAgent6 = OCUSMAAgent6.get() 
+         String inSTAT = containerOCUSMAAgent6.getString("OKSTAT")
+         int inCUTP = containerOCUSMAAgent6.get("OKCUTP")
+
+         if (inSTAT != "20") {
+            mi.error("Customer status " + inSTAT + " is invalid")   
+            return                                         
+         }
+        
+         if (inCUTP != 0 && inCUTP != 1 && inCUTP != 2) {
+            mi.error("Customer type " + inCUTP + " is invalid")   
+            return                                         
+         }
+
        }  
      }
+
 
      inAGN7 = mi.in.get("AGN7")  
      if (inAGN7 != null && inAGN7 != "") {
@@ -119,8 +198,24 @@ public class AddAgentInfo extends ExtendM3Transaction {
        if(!OCUSMAAgent7.isPresent()){                         
          mi.error("Agent 7 " + inAGN7 + " is invalid")   
          return                                         
+       } else {
+         DBContainer containerOCUSMAAgent7 = OCUSMAAgent7.get() 
+         String inSTAT = containerOCUSMAAgent7.getString("OKSTAT")
+         int inCUTP = containerOCUSMAAgent7.get("OKCUTP")
+
+         if (inSTAT != "20") {
+            mi.error("Customer status " + inSTAT + " is invalid")   
+            return                                         
+         }
+        
+         if (inCUTP != 0 && inCUTP != 1 && inCUTP != 2) {
+            mi.error("Customer type " + inCUTP + " is invalid")   
+            return                                         
+         }
+
        }   
      }
+
 
      //Check if Agent Information record exists                                                    
      Optional<DBContainer> OOHEAC = findOOHEAC(CONO, inORNO)        
@@ -138,7 +233,7 @@ public class AddAgentInfo extends ExtendM3Transaction {
   // Get Company record
   //******************************************************************** 
   private Optional<DBContainer> findCMNCMP(Integer CONO){                             
-      DBAction query = database.table("CMNCMP").index("00").selection("JICONO").build()   
+      DBAction query = database.table("CMNCMP").index("00").build()   
       DBContainer CMNCMP = query.getContainer()                                           
       CMNCMP.set("JICONO", CONO)                                                         
       if(query.read(CMNCMP))  {                                                           
@@ -151,10 +246,9 @@ public class AddAgentInfo extends ExtendM3Transaction {
   // Check Agent
   //******************************************************************** 
   private Optional<DBContainer> findOCUSMA(int CONO, String AGNT){  
-    DBAction query = database.table("OCUSMA").index("00").selection("OKCONO", "OKDIVI", "OKCUNO", "OKPYNO").build()   
+    DBAction query = database.table("OCUSMA").index("00").selection("OKCUTP", "OKSTAT").build()   
     def OCUSMA = query.getContainer()
     OCUSMA.set("OKCONO", CONO)
-    OCUSMA.set("OKDIVI", "")
     OCUSMA.set("OKCUNO", AGNT)
     
     if(query.read(OCUSMA))  { 
@@ -168,7 +262,7 @@ public class AddAgentInfo extends ExtendM3Transaction {
   // Validate if order exists in OOHEAD
   //******************************************************************** 
   private Optional<DBContainer> findOOHEAD(int CONO, String ORNO){     
-      DBAction query = database.table("OOHEAD").index("00").selectAllFields().build()   
+      DBAction query = database.table("OOHEAD").index("00").build()   
       def OOHEAD = query.getContainer()
       OOHEAD.set("OACONO", CONO)
       OOHEAD.set("OAORNO", ORNO)
@@ -184,7 +278,7 @@ public class AddAgentInfo extends ExtendM3Transaction {
   // Validate if record exists in OOHEAC
   //******************************************************************** 
   private Optional<DBContainer> findOOHEAC(int CONO, String ORNO){     
-      DBAction query = database.table("OOHEAC").index("00").selectAllFields().build()   
+      DBAction query = database.table("OOHEAC").index("00").build()   
       def OOHEAC = query.getContainer()
       OOHEAC.set("BECONO", CONO)
       OOHEAC.set("BEORNO", ORNO)
@@ -200,7 +294,7 @@ public class AddAgentInfo extends ExtendM3Transaction {
   // Add OOHEAC record
   //********************************************************************     
   void addRecord(int CONO, String ORNO, String AGN2, String AGN3, String AGN4, String AGN5, String AGN6, String AGN7){     
-     DBAction action = database.table("OOHEAC").index("00").selectAllFields().build()
+     DBAction action = database.table("OOHEAC").index("00").build()
      DBContainer OOHEAC = action.createContainer()
      OOHEAC.set("BECONO", CONO)
      OOHEAC.set("BEORNO", ORNO)
@@ -214,17 +308,17 @@ public class AddAgentInfo extends ExtendM3Transaction {
      OOHEAC.set("BECHID", program.getUser())
      OOHEAC.set("BECHNO", 1) 
      
-     LocalDateTime now = LocalDateTime.now();    
-     DateTimeFormatter format1 = DateTimeFormatter.ofPattern("yyyyMMdd");  
-     String formatDate = now.format(format1);    
-     DateTimeFormatter format2 = DateTimeFormatter.ofPattern("HHmmss");  
-     String formatTime = now.format(format2);  
+     LocalDateTime now = LocalDateTime.now()    
+     DateTimeFormatter format1 = DateTimeFormatter.ofPattern("yyyyMMdd")  
+     String formatDate = now.format(format1)    
+     DateTimeFormatter format2 = DateTimeFormatter.ofPattern("HHmmss")  
+     String formatTime = now.format(format2)  
      
      //Converting String into int using Integer.parseInt()
-     int regdate=Integer.parseInt(formatDate); 
-     int regtime=Integer.parseInt(formatTime); 
+     int regdate=Integer.parseInt(formatDate) 
+     int regtime=Integer.parseInt(formatTime) 
      OOHEAC.set("BERGDT", regdate) 
-     OOHEAC.set("BEMDT", regdate) 
+     OOHEAC.set("BELMDT", regdate) 
      OOHEAC.set("BERGTM", regtime)
      action.insert(OOHEAC)         
   } 
