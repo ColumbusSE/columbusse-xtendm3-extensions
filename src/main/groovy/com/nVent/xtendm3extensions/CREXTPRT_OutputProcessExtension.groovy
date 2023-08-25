@@ -7,6 +7,7 @@
  *
  * Date         Changed By                         Description
  * 08.06.2023   Frank Zahlten (Columbus)           creation
+ * 23.08.2023   Jessica Bjorklund (Columbus)       change logic for SPUN = HN
  *
  */
 import java.util.Map;
@@ -573,8 +574,15 @@ public class OutputProcessExtension extends ExtendM3Trigger {
 		EXT641.set("EXBJNO", jobNumber);
 		EXT641.set("EXITNO", containerODLINE.get("UBITNO"));
 		EXT641.set("EXSPUN", containerODLINE.get("UBSPUN"));
-		EXT641.set("EXNEPR", containerODLINE.get("UBNEPR"));
-		EXT641.set("EXORQA", containerODLINE.get("UBDLQA"));
+		double deliveryQty = containerODLINE.getDouble("UBDLQA");
+		String unitOfMeasure = containerODLINE.getString("UBSPUN").trim();	
+		double netPrice = containerODLINE.getDouble("UBNEPR");		
+		if (unitOfMeasure.equals("HN")) {
+		   netPrice = netPrice/100;
+		   doubleLnam = deliveryQty * netPrice;
+		} 		
+		EXT641.set("EXNEPR", netPrice);
+		EXT641.set("EXORQA", deliveryQty);
 		EXT641.set("EXFACI", containerODLINE.get("UBFACI"));
 		EXT641.set("EXLNAM", doubleLnam);
 		EXT641.set("EXRGDT", regdate as int);
