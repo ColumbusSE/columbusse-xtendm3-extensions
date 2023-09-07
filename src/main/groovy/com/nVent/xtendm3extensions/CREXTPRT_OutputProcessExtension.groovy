@@ -8,6 +8,7 @@
  * Date         Changed By                         Description
  * 08.06.2023   Frank Zahlten (Columbus)           creation
  * 23.08.2023   Jessica Bjorklund (Columbus)       change logic for SPUN = HN
+ * 05.09.2023   Jessica Bjorklund (Columbus)       separate subtotals for CAD and USD
  *
  */
 import java.util.Map;
@@ -59,9 +60,14 @@ public class OutputProcessExtension extends ExtendM3Trigger {
 	private int[] arrRidx = new int [maxCountArr];
 
 	private String strCsno = "";
+	private String strCucd = "";      
 	private double doubleLnam = 0d;
+	private double doubleLnamCucd = 0d;     
 	private String[] arrCsno = new String [maxCountArr];
 	private double[] arrLnam = new double [maxCountArr];
+	private String[] arrCucd = new String [maxCountArr];     
+	private double[] arrLnau = new double [maxCountArr];     
+	private double[] arrLnad = new double [maxCountArr];     
 
 	private java.util.List<DBContainer> records = [];
 	private int intCono = program.LDAZD.get("CONO");
@@ -501,7 +507,7 @@ public class OutputProcessExtension extends ExtendM3Trigger {
 		
 		DBAction query = database.table("ODLINE")
 				.index("00")
-				.selection("UBITNO", "UBSPUN", "UBNEPR", "UBDLQA", "UBFACI")
+				.selection("UBORNO", "UBDLIX", "UBITNO", "UBSPUN", "UBNEPR", "UBDLQA", "UBIVQA", "UBFACI", "UBWHLO", "UBTEPY", "UBDLQS", "UBIVQS")    //A JBTST
 				.build();
 		DBContainer container = query.getContainer();
 		container.set("UBCONO", intCono);
@@ -519,6 +525,25 @@ public class OutputProcessExtension extends ExtendM3Trigger {
 		records << containerODLINE;
 
 		logger.debug ("workOnOIS641PF createEXT641 workOnDataFromODLINE");
+
+
+		//get CUCD from ODHEAD    
+		DBAction action_ODHEAD = database.table("ODHEAD")
+				.index("00")
+				.selection("UACUCD")
+				.build();
+		DBContainer ODHEAD = action_ODHEAD.createContainer();
+		ODHEAD.set("UACONO", intCono);
+		ODHEAD.set("UAORNO", containerODLINE.get("UBORNO"));
+		ODHEAD.set("UAWHLO", containerODLINE.get("UBWHLO"));
+		ODHEAD.set("UADLIX", containerODLINE.get("UBDLIX"));
+		ODHEAD.set("UATEPY", containerODLINE.get("UBTEPY"));
+		if (action_ODHEAD.read(ODHEAD)) {
+			strCucd = ODHEAD.get("UACUCD");
+		} else {
+			strCucd = "";
+		}
+
 
 		//get CSNO from MITFAC
 		DBAction action_MITFAC = database.table("MITFAC")
@@ -569,22 +594,31 @@ public class OutputProcessExtension extends ExtendM3Trigger {
 				+ " EXFACI " + containerODLINE.get("UBFACI")
 				+ " EXBJNO " + jobNumber
 				);
-		//insert the new record in 341
+		//insert the new record in 641
 		EXT641.set("EXCSNO", strCsno);
 		EXT641.set("EXBJNO", jobNumber);
 		EXT641.set("EXITNO", containerODLINE.get("UBITNO"));
 		EXT641.set("EXSPUN", containerODLINE.get("UBSPUN"));
 		double deliveryQty = containerODLINE.getDouble("UBDLQA");
+		if (deliveryQty == 0d) {
+		  deliveryQty = containerODLINE.getDouble("UBIVQA");
+		}
 		String unitOfMeasure = containerODLINE.getString("UBSPUN").trim();	
 		double netPrice = containerODLINE.getDouble("UBNEPR");		
-		if (unitOfMeasure.equals("HN")) {
-		   netPrice = netPrice/100;
-		   doubleLnam = deliveryQty * netPrice;
-		} 		
 		EXT641.set("EXNEPR", netPrice);
 		EXT641.set("EXORQA", deliveryQty);
 		EXT641.set("EXFACI", containerODLINE.get("UBFACI"));
 		EXT641.set("EXLNAM", doubleLnam);
+		
+		double deliveryQtySP = containerODLINE.getDouble("UBDLQS");  
+		if (deliveryQtySP == 0d) {                                   
+		  deliveryQtySP = containerODLINE.getDouble("UBIVQS");       
+		}                                                          
+		doubleLnamCucd = deliveryQtySP * netPrice;                   
+		EXT641.set("EXORQS", deliveryQtySP);                       
+		EXT641.set("EXLNAU", doubleLnamCucd);                       
+		EXT641.set("EXCUCD", strCucd);                              
+		
 		EXT641.set("EXRGDT", regdate as int);
 		EXT641.set("EXRGTM", regtime as int);
 		EXT641.set("EXLMDT", regdate as int);
@@ -611,12 +645,14 @@ public class OutputProcessExtension extends ExtendM3Trigger {
 				for (int i = 0; i < maxCountArr; i++) {
 					arrCsno[i] = " ";
 					arrLnam[i] = 0d;
+					arrCucd[i] = " ";    
+					arrLnau[i] = 0d;    
 				}
 	
 				//read all EXT641 data for the creation of EXT642 data
 				DBAction queryEXT641 = database.table("EXT641")
 						.index("10")
-						.selection("EXLNAM", "EXCSNO")
+						.selection("EXLNAM", "EXCSNO", "EXCUCD", "EXLNAU")    
 						.build();
 				DBContainer EXT641 = queryEXT641.getContainer();
 				logger.debug ("workOnOIS641PF createEXT642 readAll 00 mit CONO" + intCono + " UDE2 " + strUde2);
@@ -633,7 +669,7 @@ public class OutputProcessExtension extends ExtendM3Trigger {
 				logger.debug ("workOnOIS641PF createEXT642 before addRecordEXT642");
 				for (int i = 0; i < maxCountArr; i++) {
 					if (arrCsno[i] != " "  && arrCsno[i] != null) {
-						addRecordEXT642(arrCsno[i], arrLnam[i]);
+						addRecordEXT642(arrCsno[i], arrLnam[i], arrCucd[i], arrLnau[i], arrLnad[i]);    
 					}
 				}
 			}
@@ -649,22 +685,36 @@ public class OutputProcessExtension extends ExtendM3Trigger {
 		logger.debug ("workOnOIS641PF createEXT642 sumUpFromEXT641 started");
 		strCsno = container.get("EXCSNO");
 		doubleLnam = container.get("EXLNAM");
+		strCucd = container.getString("EXCUCD").trim();          
+		doubleLnamCucd = container.get("EXLNAU");    
 
 		logger.debug ("workOnOIS641PF createEXT642 sumUpFromEXT641 for strCsno: " + strCsno + " LNAM: " + doubleLnam.toString());
-
+    
 		for (int i = 0; i < maxCountArr; i++) {
 			if (arrCsno[i] == strCsno) {
 				logger.debug ("workOnOIS641PF - sumUpFromEXT641 arrCsno " + strCsno + " updated with " + doubleLnam.toString());
-				arrLnam[i] += doubleLnam;
+				if (strCucd.equals("CAD")) {           
+				   arrLnau[i] += doubleLnamCucd;         
+				} else {                             
+				   arrLnad[i] += doubleLnamCucd;         
+				}                                    
+				arrLnam[i] += doubleLnam;             
 				break;
 			}
+			
 			if (arrCsno[i] == null || arrCsno[i] == " ") {
 				logger.debug ("workOnOIS641PF - sumUpFromEXT641 arrCsno " + strCsno + " inserted with " + doubleLnam.toString());
 				arrCsno[i] = strCsno;
-				arrLnam[i] = doubleLnam;
+				if (strCucd.equals("CAD")) {           
+			     arrLnau[i] = doubleLnamCucd;     
+				} else {                           
+				   arrLnad[i] = doubleLnamCucd;     
+				}
+				arrLnam[i] = doubleLnam;           
 				intIndexMax = i;
 				break;
 			}
+			
 		}
 
 	}
@@ -672,7 +722,7 @@ public class OutputProcessExtension extends ExtendM3Trigger {
 	/**
 	 * addRecordEXT642 - add a record to table EXT642
 	 */
-	void addRecordEXT642(String csno, double lnam) {
+	void addRecordEXT642(String csno, double lnam, String cucd, double lnau, double lnad) {   
 		//check exsiting record in EXT642
 		logger.debug ("workOnOIS641PF addRecordEXT642 started"
 				+ " csno " + csno
@@ -692,7 +742,11 @@ public class OutputProcessExtension extends ExtendM3Trigger {
 					+ " EXCSNO " + csno);
 			return;
 		}
-		//insert the new record in EXT641
+		//insert the new record in EXT642
+		EXT642.set("EXCUCD", "USD");    
+		EXT642.set("EXCUCU", "CAD");    
+		EXT642.set("EXLNAU", lnau);     
+		EXT642.set("EXLNAD", lnad);     
 		EXT642.set("EXLNAM", lnam);
 		EXT642.set("EXBJNO", jobNumber);
 		EXT642.set("EXRGDT", regdate as int);
@@ -758,7 +812,7 @@ public class OutputProcessExtension extends ExtendM3Trigger {
 		EXT641.set("EXORNO", container.get("EXORNO"));
 		EXT641.set("EXPONR", container.get("EXPONR"));
 		EXT641.set("EXPOSX", container.get("EXPOSX"));
-		actionEXT641.readLock(EXT641, doDelete);
+		actionEXT641.readLock(EXT641, doDelete);    
 	}
 
 	/*
@@ -779,7 +833,7 @@ public class OutputProcessExtension extends ExtendM3Trigger {
 		EXT642.set("EXCONO", intCono);
 		EXT642.set("EXUDE2", container.get("EXUDE2"));
 		EXT642.set("EXCSNO", container.get("EXCSNO"));
-		actionEXT642.readLock(EXT642, doDelete);
+		actionEXT642.readLock(EXT642, doDelete);        
 	}
 
 	/*
