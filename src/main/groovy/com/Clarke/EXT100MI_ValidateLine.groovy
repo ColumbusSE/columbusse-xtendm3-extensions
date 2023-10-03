@@ -23,7 +23,6 @@ public class ValidateLine extends ExtendM3Transaction {
   private final MICallerAPI miCaller  
   private final LoggerAPI logger   
 
-  //public double TEST
   public int inCONO
   public String inORNO
   public String inCUNO
@@ -202,7 +201,7 @@ public class ValidateLine extends ExtendM3Transaction {
   // Get OOHEAD record
   //******************************************************************** 
   private Optional<DBContainer> findOOHEAD(Integer CONO, String ORNO){  
-     DBAction query = database.table("OOHEAD").index("00").selection("OAORNO", "OAOPRI", "OAADID").build()
+     DBAction query = database.table("OOHEAD").index("00").selection("OAORNO", "OAADID").build()
      def OOHEAD = query.getContainer()
      OOHEAD.set("OACONO", CONO)
      OOHEAD.set("OAORNO", ORNO)
@@ -310,7 +309,10 @@ public class ValidateLine extends ExtendM3Transaction {
      // Read with one key  
      customerLine.set("OCCONO", inCONO) 
      customerLine.set("OCCUNO", inCUNO) 
-     actionline.readAll(customerLine, 2, releasedLineProcessor)   
+	 
+     int pageSize = mi.getMaxRecords() <= 0 || mi.getMaxRecords() >= 10000? 10000: mi.getMaxRecords()	 
+
+     actionline.readAll(customerLine, 2, pageSize, releasedLineProcessor)   
    } 
     
   //******************************************************************** 
@@ -411,7 +413,10 @@ public class ValidateLine extends ExtendM3Transaction {
      
      // Read with one key  
      itemLine.set("OICONO", inCONO)  
-     actionline.readAll(itemLine, 1, releasedLineProcessorItem)   
+	 
+	   int pageSize = mi.getMaxRecords() <= 0 || mi.getMaxRecords() >= 10000? 10000: mi.getMaxRecords()	 
+
+     actionline.readAll(itemLine, 1, pageSize, releasedLineProcessorItem)   
    } 
     
   //******************************************************************** 

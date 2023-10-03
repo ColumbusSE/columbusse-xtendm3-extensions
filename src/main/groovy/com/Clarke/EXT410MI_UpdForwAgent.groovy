@@ -127,7 +127,7 @@ public class UpdForwAgent extends ExtendM3Transaction {
   // Get MHDISH record
   //******************************************************************** 
   private Optional<DBContainer> findMHDISH(Integer CONO, Integer INOU, Long DLIX){  
-     DBAction query = database.table("MHDISH").index("00").selection("OQPGRS").build()
+     DBAction query = database.table("MHDISH").index("00").build()
      def MHDISH = query.getContainer()
      MHDISH.set("OQCONO", CONO)
      MHDISH.set("OQINOU", INOU)
