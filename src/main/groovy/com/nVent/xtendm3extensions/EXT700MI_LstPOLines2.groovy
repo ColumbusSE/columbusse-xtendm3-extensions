@@ -8,7 +8,7 @@
 //
 
 
-public class LstPOLines extends ExtendM3Transaction {
+public class LstPOLines2 extends ExtendM3Transaction {
   private final MIAPI mi 
   private final DatabaseAPI database 
   private final ProgramAPI program
@@ -26,10 +26,12 @@ public class LstPOLines extends ExtendM3Transaction {
   public String outPUNO
   public String outSUNO   
   public String outITNO
+  public String outGRNR
+  public String outPUST
 
 
   // Constructor 
-  public LstPOLines(MIAPI mi, DatabaseAPI database,ProgramAPI program, LoggerAPI logger) {
+  public LstPOLines2(MIAPI mi, DatabaseAPI database,ProgramAPI program, LoggerAPI logger) {
      this.mi = mi
      this.database = database 
      this.program = program
@@ -93,6 +95,8 @@ public class LstPOLines extends ExtendM3Transaction {
     mi.outData.put("ITNO", outITNO)
     mi.outData.put("PNLI", outPNLI)  
     mi.outData.put("PNLS", outPNLS)  
+    mi.outData.put("PUST", outPUST)  
+    mi.outData.put("GRNR", outGRNR)  
   } 
     
   //******************************************************************** 
@@ -106,16 +110,17 @@ public class LstPOLines extends ExtendM3Transaction {
 	   // Depending on input value (Registrationdate and Purchase order)
 	   // Only get invoice lines in status 70-80
      if (regDate != 0) {
-        expression = expression.le("IBPUST", "80").and(expression.ge("IBPUST", "70")).and(expression.eq("IBRGDT", String.valueOf(regDate)))    
+        expression = expression.le("IBPUSL", "80").and(expression.ge("IBPUSL", "15")).and(expression.eq("IBRGDT", String.valueOf(regDate)))    
      } else if (regDate == 0) {
-        expression = expression.le("IBPUST", "80").and(expression.ge("IBPUST", "70"))                                             
+        expression = expression.le("IBPUSL", "80").and(expression.ge("IBPUSL", "15"))                                             
      } else {
-        expression = expression.le("IBPUST", "80").and(expression.ge("IBPUST", "70"))   
+        expression = expression.le("IBPUSL", "80").and(expression.ge("IBPUSL", "15"))   
      }
 
      // List Purchase order line  	 
-     DBAction actionline = database.table("MPLINE").index("06").matching(expression).selection("IBCONO", "IBSUNO", "IBITNO", "IBPUNO", "IBPNLI", "IBPNLS", "IBRGDT", "IBPUST").build()    
+     DBAction actionline = database.table("MPLINE").index("06").matching(expression).selection("IBCONO", "IBSUNO", "IBITNO", "IBPUNO", "IBPNLI", "IBPNLS", "IBRGDT", "IBPUST", "IBPUSL").build()    
 	   DBContainer line = actionline.getContainer()   
+     
      line.set("IBCONO", CONO) 
 	   line.set("IBPUNO", purchaseOrder)                                                       
      
@@ -139,7 +144,13 @@ public class LstPOLines extends ExtendM3Transaction {
       outITNO = line.get("IBITNO") 
       outPNLI = String.valueOf(line.get("IBPNLI")) 
       outPNLS = String.valueOf(line.get("IBPNLS"))  
-
+      outPUST = line.get("IBPUST")
+      if (outPUST >= "70" && outPUST <= "80") {
+         outGRNR = "Y "
+      } else {
+         outGRNR = "N "
+      }
+    
       setOutput()
       mi.write() 
   }  
