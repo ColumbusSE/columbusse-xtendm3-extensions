@@ -334,10 +334,10 @@ public class LstPOInfo2 extends ExtendM3Transaction {
       invLineRPQA = 0d
       accInvAmount = 0d 
       invLineIVQT = 0d
-      List<DBContainer> ResultFGINLIline = listFGINLIline(company, inPUNO, inPNLI, inPNLS) 
-      for (DBContainer InvLineLine : ResultFGINLIline){
-	        invLineIVQT = InvLineLine.get("F5IVQA") 
-          invLineIVNA = InvLineLine.get("F5IVNA") 
+      List<DBContainer> resultFGINLIline = listFGINLIline(company, inPUNO, inPNLI, inPNLS) 
+      for (DBContainer invLineLine : resultFGINLIline){
+	        invLineIVQT = invLineLine.get("F5IVQA") 
+          invLineIVNA = invLineLine.get("F5IVNA") 
           accInvQty = accInvQty + invLineIVQT 
           accInvAmount = accInvAmount + invLineIVNA 
       }
@@ -354,8 +354,8 @@ public class LstPOInfo2 extends ExtendM3Transaction {
       outGRAM = ""  
       outCOMP = ""  
 
-      List<DBContainer> ResultFGRECLline = listFGRECLline(company, division, inPUNO, inPNLI, inPNLS) 
-      for (DBContainer RecLineLine : ResultFGRECLline){
+      List<DBContainer> resultFGRECLline = listFGRECLline(company, division, inPUNO, inPNLI, inPNLS) 
+      for (DBContainer RecLineLine : resultFGRECLline){
           int receivingNumber = RecLineLine.get("F2REPN")  
 
           // Accumulate quantity   
@@ -379,11 +379,11 @@ public class LstPOInfo2 extends ExtendM3Transaction {
           //Get receiving info
           MPLINDlinePUOS = 0
           MPLINDlineRPQA = 0d
-          List<DBContainer> ResultMPLIND = listMPLIND(company, inPUNO, inPNLI, inPNLS, receivingNumber, "0") 
-          for (DBContainer TransLine : ResultMPLIND){
-              MPLINDlinePUOS = TransLine.get("ICPUOS")   
-              MPLINDlineRPQA = TransLine.get("ICRPQA")
-              completeFlag = TransLine.get("ICOEND")
+          List<DBContainer> resultMPLIND = listMPLIND(company, inPUNO, inPNLI, inPNLS, receivingNumber, "0") 
+          for (DBContainer transLine : resultMPLIND){
+              MPLINDlinePUOS = transLine.get("ICPUOS")   
+              MPLINDlineRPQA = transLine.get("ICRPQA")
+              completeFlag = transLine.get("ICOEND")
 
               if(completeFlag == 1){ 
                  outCOMP = "Yes" 
@@ -398,9 +398,9 @@ public class LstPOInfo2 extends ExtendM3Transaction {
           MPLINDlinePUOS = 0
           MPLINDlineRPQA = 0d
           if (highestStatus > 60) {
-            List<DBContainer> ResultMPLINDRep64 = listMPLIND(company, inPUNO, inPNLI, inPNLS, receivingNumber, "64") 
-            for (DBContainer TransLine : ResultMPLINDRep64){
-                MPLINDlineRPQA = TransLine.get("ICRPQA")
+            List<DBContainer> resultMPLINDRep64 = listMPLIND(company, inPUNO, inPNLI, inPNLS, receivingNumber, "64") 
+            for (DBContainer transLine : resultMPLINDRep64){
+                MPLINDlineRPQA = transLine.get("ICRPQA")
             }
           } else {
                MPLINDlineRPQA = repQty
@@ -525,7 +525,7 @@ public class LstPOInfo2 extends ExtendM3Transaction {
   //******************************************************************** 
   private Optional<DBContainer> findCMNDIV(Integer CONO, String DIVI){  
     DBAction query = database.table("CMNDIV").index("00").selection("CCCONO", "CCCSCD", "CCDIVI").build()
-    def CMNDIV = query.getContainer()
+    DBContainer CMNDIV = query.getContainer()
     CMNDIV.set("CCCONO", CONO)
     CMNDIV.set("CCDIVI", DIVI)
     if(query.read(CMNDIV))  { 
@@ -541,7 +541,7 @@ public class LstPOInfo2 extends ExtendM3Transaction {
   //******************************************************************** 
   private Optional<DBContainer> findMPLINE(Integer CONO, String PUNO, Integer PNLI, Integer PNLS){  
     DBAction query = database.table("MPLINE").index("00").selection("IBPUPR", "IBCONO", "IBPUNO", "IBPNLI", "IBPNLS", "IBITNO", "IBLPUD", "IBLNAM", "IBPITD", "IBVTCD", "IBORQA", "IBIVQA", "IBRVQA", "IBPUUN", "IBPPUN", "IBODI1", "IBODI2", "IBODI3", "IBCFD1", "IBCFD2", "IBCFD3", "IBCPPR").build()    
-    def MPLINE = query.getContainer()
+    DBContainer MPLINE = query.getContainer()
     MPLINE.set("IBCONO", CONO)
     MPLINE.set("IBPUNO", PUNO)
     MPLINE.set("IBPNLI", PNLI)
@@ -559,7 +559,7 @@ public class LstPOInfo2 extends ExtendM3Transaction {
   //******************************************************************** 
   private Optional<DBContainer> findMPHEAD(Integer CONO, String PUNO){  
     DBAction query = database.table("MPHEAD").index("00").selection("IACONO", "IAPUNO", "IADIVI", "IASUNO", "IANTAM", "IAPUDT", "IABUYE", "IACOAM").build()    
-    def MPHEAD = query.getContainer()
+    DBContainer MPHEAD = query.getContainer()
     MPHEAD.set("IACONO", CONO)
     MPHEAD.set("IAPUNO", PUNO)
     if(query.read(MPHEAD))  { 
@@ -574,21 +574,20 @@ public class LstPOInfo2 extends ExtendM3Transaction {
   // Accumulate value from FGINLI - PO line level
   //******************************************************************** 
   private List<DBContainer> listFGINLIline(Integer CONO, String PUNO, Integer PNLI, Integer PNLS){ 
-    List<DBContainer>InvLine = new ArrayList() 
+    List<DBContainer>invLine = new ArrayList() 
     ExpressionFactory expression = database.getExpressionFactory("FGINLI")
     DBAction query = database.table("FGINLI").index("20").selection("F5IVQA", "F5IVNA").build() 
     DBContainer FGINLIline = query.getContainer() 
     FGINLIline.set("F5CONO", CONO)   
     FGINLIline.set("F5PUNO", PUNO) 
     FGINLIline.set("F5PNLI", PNLI) 
-    FGINLIline.set("F5PNLS", PNLS) 
 
     int pageSize = mi.getMaxRecords() <= 0 || mi.getMaxRecords() >= 10000? 10000: mi.getMaxRecords()        
     query.readAll(FGINLIline, 3, pageSize, { DBContainer record ->  
-     InvLine.add(record) 
+     invLine.add(record) 
     })
 
-    return InvLine
+    return invLine
   } 
 
 
@@ -596,9 +595,8 @@ public class LstPOInfo2 extends ExtendM3Transaction {
   // Get record from MPLIND
   //******************************************************************** 
   private List<DBContainer> listMPLIND(int CONO, String PUNO, int PNLI, int PNLS, int REPN, String PUOS){ 
-    List<DBContainer>TransLine = new ArrayList() 
+    List<DBContainer>transLine = new ArrayList() 
     ExpressionFactory expression = database.getExpressionFactory("MPLIND")
-    expression = expression.eq("ICPUNO", PUNO).and(expression.eq("ICCONO", String.valueOf(CONO))).and(expression.eq("ICPNLI", String.valueOf(inPNLI))).and(expression.eq("ICPNLS", String.valueOf(inPNLS))).and(expression.eq("ICREPN", String.valueOf(REPN)))    
     DBAction query = database.table("MPLIND").index("60").selection("ICOEND", "ICRPQA", "ICPUOS").build() 
     DBContainer MPLIND = query.getContainer() 
     MPLIND.set("ICCONO", CONO)   
@@ -611,15 +609,15 @@ public class LstPOInfo2 extends ExtendM3Transaction {
     int pageSize = mi.getMaxRecords() <= 0 || mi.getMaxRecords() >= 10000? 10000: mi.getMaxRecords()        
     if (PUOS.equals("0")) {
        query.readAll(MPLIND, 5, pageSize, { DBContainer record ->  
-       TransLine.add(record) 
+       transLine.add(record) 
       })
     } else {
        query.readAll(MPLIND, 6, pageSize, { DBContainer record ->  
-       TransLine.add(record) 
+       transLine.add(record) 
       })
     }
     
-    return TransLine
+    return transLine
   } 
    
 
@@ -665,13 +663,12 @@ public class LstPOInfo2 extends ExtendM3Transaction {
     List<DBContainer>RecLineLine = new ArrayList() 
     ExpressionFactory expression = database.getExpressionFactory("FGRECL")
     expression = expression.ne("F2RPQA", String.valueOf(0)) 
-    def query = database.table("FGRECL").index("00").matching(expression).selection("F2REPN", "F2RCAC", "F2SERA", "F2IVQA", "F2RPQA", "F2ICAC", "F2SUDO", "F2CAWE", "F2TRDT").build()
-    def FGRECLline = query.createContainer()
+    DBAction query = database.table("FGRECL").index("00").matching(expression).selection("F2REPN", "F2RCAC", "F2SERA", "F2IVQA", "F2RPQA", "F2ICAC", "F2SUDO", "F2CAWE", "F2TRDT").build()
+    DBContainer FGRECLline = query.createContainer()
     FGRECLline.set("F2CONO", CONO)
     FGRECLline.set("F2DIVI", DIVI)
     FGRECLline.set("F2PUNO", PUNO)
     FGRECLline.set("F2PNLI", PNLI)
-    FGRECLline.set("F2PNLS", PNLS) 
 
 	  int pageSize = mi.getMaxRecords() <= 0 || mi.getMaxRecords() >= 10000? 10000: mi.getMaxRecords()        
     query.readAll(FGRECLline, 4, pageSize, { DBContainer record ->  
@@ -688,7 +685,7 @@ public class LstPOInfo2 extends ExtendM3Transaction {
   //******************************************************************** 
   private Optional<DBContainer> findCIDMAS(Integer CONO, String SUNO){  
     DBAction query = database.table("CIDMAS").index("00").selection("IDCSCD").build()
-    def CIDMAS = query.getContainer()
+    DBContainer CIDMAS = query.getContainer()
     CIDMAS.set("IDCONO", CONO)
     CIDMAS.set("IDSUNO", SUNO)
     if(query.read(CIDMAS))  { 
@@ -704,7 +701,7 @@ public class LstPOInfo2 extends ExtendM3Transaction {
   //******************************************************************** 
   private Optional<DBContainer> findCEMAIL(Integer CONO, String BUYE){   
     DBAction query = database.table("CEMAIL").index("00").selection("CBEMAL").build()
-    def CEMAIL = query.getContainer()
+    DBContainer CEMAIL = query.getContainer()
     CEMAIL.set("CBCONO", CONO)
     CEMAIL.set("CBEMTP", "04")
     CEMAIL.set("CBEMKY", BUYE)
@@ -721,7 +718,7 @@ public class LstPOInfo2 extends ExtendM3Transaction {
   //******************************************************************** 
    private Optional<DBContainer> findMITAUN(Integer CONO, String ITNO, Integer AUTP, String ALUN){  
     DBAction query = database.table("MITAUN").index("00").selection("MUCOFA", "MUDMCF", "MUAUTP", "MUALUN").build()
-    def MITAUN = query.getContainer()
+    DBContainer MITAUN = query.getContainer()
     MITAUN.set("MUCONO", CONO)
     MITAUN.set("MUITNO", ITNO)
     MITAUN.set("MUAUTP", AUTP)

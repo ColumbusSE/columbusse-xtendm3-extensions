@@ -93,7 +93,7 @@ public class LstVendor2 extends ExtendM3Transaction {
   //******************************************************************** 
   private Optional<DBContainer> findCIDVEN(Integer CONO, String SUNO){  
     DBAction query = database.table("CIDVEN").index("00").selection("IICUCD", "IITEPY").build()
-    def CIDVEN = query.getContainer()
+    DBContainer CIDVEN = query.getContainer()
     CIDVEN.set("IICONO", CONO)
     CIDVEN.set("IISUNO", SUNO)
     if(query.read(CIDVEN))  { 
@@ -109,7 +109,7 @@ public class LstVendor2 extends ExtendM3Transaction {
   //******************************************************************** 
   private Optional<DBContainer> findCIDADR(Integer CONO, String SUNO, Integer ADTE){  
     DBAction query = database.table("CIDADR").index("10").selection("SAADR1", "SATOWN", "SAPONO").build()
-    def CIDADR = query.getContainer()
+    DBContainer CIDADR = query.getContainer()
     CIDADR.set("SACONO", CONO)
     CIDADR.set("SASUNO", SUNO)
     CIDADR.set("SAADTE", ADTE)
@@ -137,7 +137,7 @@ public class LstVendor2 extends ExtendM3Transaction {
   //******************************************************************** 
   private Optional<DBContainer> findbankCIDADR(Integer CONO, String SUNO, int ADTE){  
     DBAction query = database.table("CIDADR").index("10").selection("SAADR1", "SATOWN", "SAPONO").build()
-    def CIDADR2 = query.getContainer()
+    DBContainer CIDADR2 = query.getContainer()
     CIDADR2.set("SACONO", CONO)
     CIDADR2.set("SASUNO", SUNO)
     CIDADR2.set("SAADTE", ADTE)
@@ -164,7 +164,7 @@ public class LstVendor2 extends ExtendM3Transaction {
   //******************************************************************** 
   private Optional<DBContainer> findCEMAIL(Integer CONO, String SUNO){   
     DBAction query = database.table("CEMAIL").index("00").selection("CBEMAL").build()
-    def CEMAIL = query.getContainer()
+    DBContainer CEMAIL = query.getContainer()
     CEMAIL.set("CBCONO", CONO)
     CEMAIL.set("CBEMTP", "02")
     CEMAIL.set("CBEMKY", SUNO)

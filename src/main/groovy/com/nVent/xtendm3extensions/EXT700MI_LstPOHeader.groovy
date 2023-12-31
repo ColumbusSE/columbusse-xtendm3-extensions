@@ -81,10 +81,10 @@ public class LstPOHeader extends ExtendM3Transaction {
     clearOutput()
 
     //List PO to sum line info
-    List<DBContainer> ResultMPLINE = listMPLINE(company, inPUNO) 
-    for (DBContainer RecLineMPLINE : ResultMPLINE){ 
-        inPNLI = RecLineMPLINE.get("IBPNLI")
-        inPNLS = RecLineMPLINE.get("IBPNLS")
+    List<DBContainer> resultMPLINE = listMPLINE(company, inPUNO) 
+    for (DBContainer recLineMPLINE : resultMPLINE){ 
+        inPNLI = recLineMPLINE.get("IBPNLI")
+        inPNLS = recLineMPLINE.get("IBPNLS")
 
         orderedAmountString = ""
         deliveredAmountString = ""
@@ -120,8 +120,8 @@ public class LstPOHeader extends ExtendM3Transaction {
    // Get line info for calculation
    //***************************************************************************** 
    void lstPOInfoMI(String company, String purchaseOrder, String lineNumber, String lineSuffix){   
-        def params = [CONO: company, PUNO: purchaseOrder, PNLI: lineNumber, PNLS: lineSuffix] 
-        def callback = {
+        Map<String, String> params = [CONO: company, PUNO: purchaseOrder, PNLI: lineNumber, PNLS: lineSuffix] 
+        Closure<?> callback = {
           Map<String, String> response ->
           if(response.LNAM != null){
              orderedAmountString = response.LNAM 
@@ -145,20 +145,20 @@ public class LstPOHeader extends ExtendM3Transaction {
   // Read all lines for entered PO
   //********************************************************************  
   private List<DBContainer> listMPLINE(int CONO, String PUNO){
-      List<DBContainer>RecLineMPLINE = new ArrayList() 
+      List<DBContainer>recLineMPLINE = new ArrayList() 
       ExpressionFactory expression = database.getExpressionFactory("MPLINE")
-      expression = expression.eq("IBCONO", String.valueOf(CONO)).and(expression.eq("IBPUNO", PUNO))
+      expression = expression.eq("IBPUNO", PUNO)
       
-      def query = database.table("MPLINE").index("00").matching(expression).selection("IBPNLI", "IBPNLS").build()
-      def MPLINE = query.createContainer()
+      DBAction query = database.table("MPLINE").index("00").matching(expression).selection("IBPNLI", "IBPNLS").build()
+      DBContainer MPLINE = query.createContainer()
       MPLINE.set("IBCONO", CONO)
       
       int pageSize = mi.getMaxRecords() <= 0 || mi.getMaxRecords() >= 10000? 10000: mi.getMaxRecords()    
       query.readAll(MPLINE, 1, pageSize, { DBContainer recordMPLINE ->  
-         RecLineMPLINE.add(recordMPLINE.createCopy()) 
+         recLineMPLINE.add(recordMPLINE.createCopy()) 
       })
   
-      return RecLineMPLINE
+      return recLineMPLINE
   }
   
 

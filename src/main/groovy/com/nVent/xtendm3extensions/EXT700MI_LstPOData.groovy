@@ -235,10 +235,10 @@ public class LstPOData extends ExtendM3Transaction {
         invLineRPQA = 0d
         accInvAmount = 0d 
         invLineIVQT = 0d
-        List<DBContainer> ResultFGINLIline = listFGINLIline(company, inPUNO, inPNLI, inPNLS) 
-        for (DBContainer InvLineLine : ResultFGINLIline){
-  	        invLineIVQT = InvLineLine.get("F5IVQA") 
-            invLineIVNA = InvLineLine.get("F5IVNA") 
+        List<DBContainer> resultFGINLIline = listFGINLIline(company, inPUNO, inPNLI, inPNLS) 
+        for (DBContainer invLineLine : resultFGINLIline){
+  	        invLineIVQT = invLineLine.get("F5IVQA") 
+            invLineIVNA = invLineLine.get("F5IVNA") 
             accInvQty = accInvQty + invLineIVQT 
             accInvAmount = accInvAmount + invLineIVNA 
         }
@@ -337,7 +337,7 @@ public class LstPOData extends ExtendM3Transaction {
     //******************************************************************** 
     private Optional<DBContainer> findMPLINE(Integer CONO, String PUNO, Integer PNLI, Integer PNLS){  
       DBAction query = database.table("MPLINE").index("00").selection("IBPUPR", "IBCONO", "IBPUNO", "IBPNLI", "IBPNLS", "IBITNO", "IBLPUD", "IBLNAM", "IBPITD", "IBVTCD", "IBORQA", "IBIVQA", "IBRVQA", "IBPUUN", "IBPPUN", "IBODI1", "IBODI2", "IBODI3", "IBCFD1", "IBCFD2", "IBCFD3", "IBCPPR").build()    
-      def MPLINE = query.getContainer()
+      DBContainer MPLINE = query.getContainer()
       MPLINE.set("IBCONO", CONO)
       MPLINE.set("IBPUNO", PUNO)
       MPLINE.set("IBPNLI", PNLI)
@@ -356,7 +356,7 @@ public class LstPOData extends ExtendM3Transaction {
     //******************************************************************** 
     private Optional<DBContainer> findMPHEAD(Integer CONO, String PUNO){  
       DBAction query = database.table("MPHEAD").index("00").selection("IACONO", "IAPUNO", "IADIVI", "IASUNO", "IANTAM", "IAPUDT", "IABUYE", "IACOAM").build()    
-      def MPHEAD = query.getContainer()
+      DBContainer MPHEAD = query.getContainer()
       MPHEAD.set("IACONO", CONO)
       MPHEAD.set("IAPUNO", PUNO)
       if(query.read(MPHEAD))  { 
@@ -372,9 +372,9 @@ public class LstPOData extends ExtendM3Transaction {
     // Accumulate value from FGINLI - PO line level
     //******************************************************************** 
     private List<DBContainer> listFGINLIline(Integer CONO, String PUNO, Integer PNLI, Integer PNLS){ 
-      List<DBContainer>InvLine = new ArrayList() 
+      List<DBContainer>invLine = new ArrayList() 
       ExpressionFactory expression = database.getExpressionFactory("FGINLI")
-      DBAction query = database.table("FGINLI").index("20").selectAllFields().build() 
+      DBAction query = database.table("FGINLI").index("20").selection("F5IVQA", "F5IVNA").build() 
       DBContainer FGINLIline = query.getContainer() 
       FGINLIline.set("F5CONO", CONO)   
       FGINLIline.set("F5PUNO", PUNO) 
@@ -383,10 +383,10 @@ public class LstPOData extends ExtendM3Transaction {
   
       int pageSize = mi.getMaxRecords() <= 0 || mi.getMaxRecords() >= 10000? 10000: mi.getMaxRecords()        
       query.readAll(FGINLIline, 3, pageSize, { DBContainer record ->  
-       InvLine.add(record) 
+       invLine.add(record) 
       })
   
-      return InvLine
+      return invLine
     } 
     
     
@@ -396,7 +396,7 @@ public class LstPOData extends ExtendM3Transaction {
     //******************************************************************** 
     private Optional<DBContainer> findCEMAIL(Integer CONO, String BUYE){   
       DBAction query = database.table("CEMAIL").index("00").selection("CBEMAL").build()
-      def CEMAIL = query.getContainer()
+      DBContainer CEMAIL = query.getContainer()
       CEMAIL.set("CBCONO", CONO)
       CEMAIL.set("CBEMTP", "04")
       CEMAIL.set("CBEMKY", BUYE)
@@ -413,7 +413,7 @@ public class LstPOData extends ExtendM3Transaction {
     //******************************************************************** 
      private Optional<DBContainer> findMITAUN(Integer CONO, String ITNO, Integer AUTP, String ALUN){  
       DBAction query = database.table("MITAUN").index("00").selection("MUCOFA", "MUDMCF", "MUAUTP", "MUALUN").build()
-      def MITAUN = query.getContainer()
+      DBContainer MITAUN = query.getContainer()
       MITAUN.set("MUCONO", CONO)
       MITAUN.set("MUITNO", ITNO)
       MITAUN.set("MUAUTP", AUTP)
