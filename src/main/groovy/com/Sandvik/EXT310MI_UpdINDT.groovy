@@ -152,7 +152,7 @@ public class UpdINDT extends ExtendM3Transaction {
   //******************************************************************** 
   private Optional<DBContainer> findMITWHL(Integer CONO, String WHLO){  
      DBAction query = database.table("MITWHL").index("00").selection("MWCONO", "MWWHLO").build()
-     def MITWHL = query.getContainer()
+     DBContainer MITWHL = query.getContainer()
      MITWHL.set("MWCONO", CONO)
      MITWHL.set("MWWHLO", WHLO)
      if(query.read(MITWHL))  { 
@@ -167,7 +167,7 @@ public class UpdINDT extends ExtendM3Transaction {
   //******************************************************************** 
   private Optional<DBContainer> findMITLOC(Integer CONO, String WHLO, String ITNO, String WHSL, String BANO, String CAMU, Integer REPN){  
      DBAction query = database.table("MITLOC").index("00").build()
-     def MITLOC = query.getContainer()
+     DBContainer MITLOC = query.getContainer()
      MITLOC.set("MLCONO", CONO)
      MITLOC.set("MLWHLO", WHLO)
      MITLOC.set("MLITNO", ITNO)
@@ -188,7 +188,7 @@ public class UpdINDT extends ExtendM3Transaction {
   //******************************************************************** 
   private Optional<DBContainer> findMITMAS(Integer CONO, String ITNO){  
      DBAction query = database.table("MITMAS").index("00").build()
-     def MITMAS = query.getContainer()
+     DBContainer MITMAS = query.getContainer()
      MITMAS.set("MMCONO", CONO)
      MITMAS.set("MMITNO", ITNO)
      if(query.read(MITMAS))  { 
@@ -204,7 +204,7 @@ public class UpdINDT extends ExtendM3Transaction {
   //******************************************************************** 
   private Optional<DBContainer> findMITPCE(Integer CONO, String WHLO, String WHSL){  
      DBAction query = database.table("MITPCE").index("00").build()
-     def MITPCE = query.getContainer()
+     DBContainer MITPCE = query.getContainer()
      MITPCE.set("MSCONO", CONO)
      MITPCE.set("MSWHLO", WHLO)
      MITPCE.set("MSWHSL", WHSL)
@@ -221,7 +221,7 @@ public class UpdINDT extends ExtendM3Transaction {
   //******************************************************************** 
   private Optional<DBContainer> findMITBAL(Integer CONO, String WHLO, String ITNO){  
      DBAction query = database.table("MITBAL").index("00").build()
-     def MITBAL = query.getContainer()
+     DBContainer MITBAL = query.getContainer()
      MITBAL.set("MBCONO", CONO)
      MITBAL.set("MBWHLO", WHLO)
      MITBAL.set("MBITNO", ITNO)
