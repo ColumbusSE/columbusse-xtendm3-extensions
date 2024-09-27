@@ -6,6 +6,10 @@
 // API transaction AddStockCount will be used to add a Stock Count record to table EXTSTK
 // ERP-9265
 
+// Date         Changed By                         Description
+// 2024-05-10   Jessica Bjorklund (Columbus)       Creation
+// 2024-09-10   Jessica Bjorklund (Columbus)       Set on-hand balance to 0 if MITLOC record not found
+
 
 /**
  * IN
@@ -116,8 +120,7 @@ public class AddStockCount extends ExtendM3Transaction {
         DBContainer containerMITLOC = MITLOC.get()  
         onHandBalance = containerMITLOC.get("MLSTQT")
      } else {
-        mi.error("MITLOC record does not exist")   
-        return             
+        onHandBalance = 0d
      } 
      
      
