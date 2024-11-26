@@ -7,6 +7,10 @@
 // Transaction UpdAbnormalDem
 // 
 
+// Date         Changed By                         Description
+// 2023-01-11   Jessica Bjorklund (Columbus)       Creation
+
+
 public class UpdAbnormalDem extends ExtendM3Transaction {
   private final MIAPI mi
   private final DatabaseAPI database 
@@ -76,7 +80,7 @@ public class UpdAbnormalDem extends ExtendM3Transaction {
   //******************************************************************** 
   private Optional<DBContainer> findOOHEAD(Integer CONO, String ORNO){  
      DBAction query = database.table("OOHEAD").index("00").build()
-     def OOHEAD = query.getContainer()
+     DBContainer OOHEAD = query.getContainer()
      OOHEAD.set("OACONO", CONO)
      OOHEAD.set("OAORNO", ORNO)
      if(query.read(OOHEAD))  { 
@@ -92,7 +96,7 @@ public class UpdAbnormalDem extends ExtendM3Transaction {
   //******************************************************************** 
   private Optional<DBContainer> findOOLINE(Integer CONO, String ORNO, int PONR, int POSX){  
      DBAction query = database.table("OOLINE").index("00").build()
-     def OOLINE = query.getContainer()
+     DBContainer OOLINE = query.getContainer()
      OOLINE.set("OBCONO", CONO)
      OOLINE.set("OBORNO", ORNO)
      OOLINE.set("OBPONR", PONR)
@@ -104,7 +108,10 @@ public class UpdAbnormalDem extends ExtendM3Transaction {
      return Optional.empty()
   }
 
- 
+
+  //******************************************************************** 
+  // Update record in OOLINE, field ABNO
+  //******************************************************************** 
   void updRecord(){ 
      DBAction action = database.table("OOLINE").index("00").build()
      DBContainer OOLINE = action.getContainer()
@@ -120,7 +127,7 @@ public class UpdAbnormalDem extends ExtendM3Transaction {
     
   Closure<?> updateCallBack = { LockedResult lockedResult -> 
      // Update the fields if filled
-     if(mi.in.get("ABNO") != null){  
+     if (mi.in.get("ABNO") != null) {  
         lockedResult.set("OBABNO", mi.in.get("ABNO")) 
      }
      
