@@ -9,7 +9,7 @@
 
 // Date         Changed By                         Description
 // 2023-01-11   Jessica Bjorklund (Columbus)       Creation
-
+// 2024-11-27   Jessica Bjorklund (Columbus)       Added validation of HOCD
 
 public class UpdAbnormalDem extends ExtendM3Transaction {
   private final MIAPI mi
@@ -23,6 +23,7 @@ public class UpdAbnormalDem extends ExtendM3Transaction {
   int inPONR
   int inPOSX
   int inABNO
+  int inHOCD
 
   public UpdAbnormalDem(MIAPI mi, DatabaseAPI database, ProgramAPI program, UtilityAPI utility, LoggerAPI logger) {
      this.mi = mi
@@ -43,11 +44,19 @@ public class UpdAbnormalDem extends ExtendM3Transaction {
      // Validate Order Number, ORNO, in OOHEAD
      inORNO = mi.in.get("ORNO")  
      Optional<DBContainer> OOHEAD = findOOHEAD(inCONO, inORNO)
-     if (!OOHEAD.isPresent()) {
+     if(!OOHEAD.isPresent()){
         mi.error("OOHEAD record doesn't exists")   
         return             
-     } 
+     } else {
+        DBContainer OOHEADContainer = OOHEAD.get() 
+        inHOCD = OOHEADContainer.get("OAHOCD")
+     }
     
+     if (inHOCD != 0) {
+        mi.error("Order is in use. Update not allowed")   
+        return            
+     }
+
      // Line Number, PONR
      inPONR = mi.in.get("PONR")  
 
@@ -79,7 +88,7 @@ public class UpdAbnormalDem extends ExtendM3Transaction {
   // Validate OOHEAD record
   //******************************************************************** 
   private Optional<DBContainer> findOOHEAD(Integer CONO, String ORNO){  
-     DBAction query = database.table("OOHEAD").index("00").build()
+     DBAction query = database.table("OOHEAD").index("00").selection("OAHOCD").build()
      DBContainer OOHEAD = query.getContainer()
      OOHEAD.set("OACONO", CONO)
      OOHEAD.set("OAORNO", ORNO)
