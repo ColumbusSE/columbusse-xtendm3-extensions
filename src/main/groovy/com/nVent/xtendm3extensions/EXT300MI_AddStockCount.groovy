@@ -9,6 +9,8 @@
 // Date         Changed By                         Description
 // 2024-05-10   Jessica Bjorklund (Columbus)       Creation
 // 2024-09-10   Jessica Bjorklund (Columbus)       Set on-hand balance to 0 if MITLOC record not found
+// 2024-11-21   Jessica Bjorklund (Columbus)       Add validation of Inventory Date
+
 
 
 /**
@@ -104,6 +106,11 @@ public class AddStockCount extends ExtendM3Transaction {
         mi.error("MITTKD record does not exist")   
         return             
      } 
+     
+     if (inventoryDate > 0) {  
+     } else {
+       return
+     }
      
      logger.debug("companyNumber ${companyNumber}")
      logger.debug("warehouse ${warehouse}")
